@@ -181,6 +181,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
   - type: PhysicalComposition #Goobstation - Recycle update
     materialComposition:
@@ -213,7 +214,7 @@
 #goobstation edit start
 - type: entity
   abstract: true
-  parent: [ClothingHeadBase] 
+  parent: [ClothingHeadBase]
   id: ClothingHeadHatArmored
   components:
   - type: Armor # Goob
@@ -250,6 +251,7 @@
     - PetWearable
     - CorgiWearable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -299,6 +301,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
   - type: PhysicalComposition #Goobstation - Recycle update
     materialComposition:
@@ -322,6 +325,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -331,9 +335,9 @@
   description: A beret with the cargo department's insignia.
   components:
   - type: Sprite
-    sprite: Clothing/Head/Hats/beret_qm.rsi
+    sprite: _Goobstation/Clothing/Head/Hats/beret_qm.rsi # Goob Station - beret edit
   - type: Clothing
-    sprite: Clothing/Head/Hats/beret_qm.rsi
+    sprite: _Goobstation/Clothing/Head/Hats/beret_qm.rsi # Goob Station - beret edit
   - type: Tag
     tags:
     - PetWearable
@@ -341,6 +345,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -360,6 +365,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -436,6 +442,7 @@
     tags:
     - ClothMade
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
     - PetWearable
     - CorgiWearable
@@ -472,6 +479,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -535,6 +543,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -554,6 +563,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -603,6 +613,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -622,6 +633,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -789,6 +801,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
   - type: HideLayerClothing
     layers:
@@ -845,6 +858,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -877,6 +891,7 @@
     - WhitelistChameleon
     - DroneUsable
     - Ushanka
+    - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadBase
@@ -1017,6 +1032,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -1166,6 +1182,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -1237,6 +1254,7 @@
     - ClothMade
     - Recyclable
     - HamsterWearable
+    - MouseWearable # Goobstation
     - WhitelistChameleon
 
 - type: entity
@@ -1389,6 +1407,7 @@
     - Recyclable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
   - type: SentienceTarget
     flavorKind: station-event-random-sentience-flavor-inanimate
     weight: 0.0002 # 5,000 times less likely than 1 regular animal
@@ -1414,6 +1433,7 @@
     - Recyclable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
 
 
 - type: entity
@@ -1448,6 +1468,7 @@
     - CorgiWearable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
     - DroneUsable # Goobstation
 
 - type: entity
@@ -1465,6 +1486,7 @@
     - CorgiWearable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatPartyRed
@@ -1481,6 +1503,7 @@
     - CorgiWearable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatPartyRed
@@ -1497,6 +1520,7 @@
     - CorgiWearable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatPartyRed
@@ -1514,6 +1538,7 @@
     - CorgiWearable
     - WhitelistChameleon
     - HamsterWearable
+    - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadBase
@@ -1562,6 +1587,7 @@
       - CorgiWearable
       - WhitelistChameleon
       - HamsterWearable
+      - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatCowboyBrown
@@ -1578,6 +1604,7 @@
       - CorgiWearable
       - WhitelistChameleon
       - HamsterWearable
+      - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatCowboyBrown
@@ -1594,6 +1621,7 @@
       - CorgiWearable
       - WhitelistChameleon
       - HamsterWearable
+      - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatCowboyBrown
@@ -1610,6 +1638,7 @@
       - CorgiWearable
       - WhitelistChameleon
       - HamsterWearable
+      - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatCowboyBrown
@@ -1626,6 +1655,7 @@
       - CorgiWearable
       - WhitelistChameleon
       - HamsterWearable
+      - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadHatCowboyBrown
@@ -1642,6 +1672,7 @@
       - CorgiWearable
       - WhitelistChameleon
       - HamsterWearable
+      - MouseWearable # Goobstation
 
 - type: entity
   parent: ClothingHeadBase
@@ -1661,6 +1692,7 @@
     - PetWearable
     - CorgiWearable
     - HamsterWearable
+    - MouseWearable # Goobstation
   - type: Flammable
     fireSpread: true
     canResistFire: false
