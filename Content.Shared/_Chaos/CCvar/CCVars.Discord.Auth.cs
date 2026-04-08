@@ -32,7 +32,7 @@ public sealed partial class CCVars
     ///     Link to Discord server to show in the launcher.
     /// </summary>
     public static readonly CVarDef<string> InfoLinksAuthChannelDiscord =
-        CVarDef.Create("infolinks.auth_channel_discord", "https://discord.com/channels/1475918847759356117/1481280582368493761", CVar.SERVER | CVar.REPLICATED);
+        CVarDef.Create("infolinks.auth_channel_discord", "https://discord.com/channels/1424305560966140004/1490642843067355226", CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>
     ///    Secret token to send to the bot when a user tries to authenticate. This is used to prevent unauthorized requests to the bot.
