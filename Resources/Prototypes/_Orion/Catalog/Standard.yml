@@ -309,3 +309,101 @@
   name: Nostalghia - Who You Talkin To Man
   path:
     path: /Audio/_Orion/Jukebox/Nostalghia/Nostalghia_WhoYouTalkinToMan.ogg
+
+# Chaos-start
+- type: jukebox
+  id: addicted
+  name: (Chaos) addicted - чего хотел добиться ты
+  path:
+    path: /Audio/_Chaos/Jukebox/addicted-chego-khotel-dobitsya-ty.ogg
+
+- type: jukebox
+  id: angerfist
+  name: (Chaos) Angerfist - Lncoming
+  path:
+    path: /Audio/_Chaos/Jukebox/angerfist-lncoming.ogg
+
+- type: jukebox
+  id: arktida_imperiya
+  name: (Chaos) Арктида - Моя империя
+  path:
+    path: /Audio/_Chaos/Jukebox/arktida-moya-imperiya.ogg
+
+- type: jukebox
+  id: arktida_valashskijj
+  name: (Chaos) Арктида - Валашский князь
+  path:
+    path: /Audio/_Chaos/Jukebox/arktida-valashskijj-knyaz.ogg
+
+- type: jukebox
+  id: beregovoe_bratstvo
+  name: (Chaos) Береговое братство - Охота
+  path:
+    path: /Audio/_Chaos/Jukebox/beregovoe-bratstvo-okhota.ogg
+
+- type: jukebox
+  id: fun_mode
+  name: (Chaos) Fun Mode - Jrkho Войны
+  path:
+    path: /Audio/_Chaos/Jukebox/fun-mode-jrkho-vojjny.ogg
+
+- type: jukebox
+  id: veter
+  name: (Chaos) Группа Ветер - Не делай людям добра
+  path:
+    path: /Audio/_Chaos/Jukebox/gruppa-veter-ne-delajj-lyudyam-dobra.ogg
+
+- type: jukebox
+  id: heavy_raid
+  name: (Chaos) Heavy Raid - Чернокнижник
+  path:
+    path: /Audio/_Chaos/Jukebox/heavy-raid-chernoknizhnik.ogg
+
+- type: jukebox
+  id: inkvisitor
+  name: (Chaos) Инквизитор - Ловчие душ
+  path:
+    path: /Audio/_Chaos/Jukebox/inkvisitor-lovchie-dush.ogg
+
+- type: jukebox
+  id: jepidemiya
+  name: (Chaos) Эпидемия - Когда уснут драконы
+  path:
+    path: /Audio/_Chaos/Jukebox/jepidemiya-kogda-usnut-drakony.ogg
+
+- type: jukebox
+  id: maretu
+  name: (Chaos) Maretu - I'm High
+  path:
+    path: /Audio/_Chaos/Jukebox/maretu-im-high.ogg
+
+- type: jukebox
+  id: molitva
+  name: (Chaos) Молитва
+  path:
+    path: /Audio/_Chaos/Jukebox/molitva.ogg
+
+- type: jukebox
+  id: neizvestnyjj
+  name: (Chaos) Неизвестный - Тот у кого глаза велики
+  path:
+    path: /Audio/_Chaos/Jukebox/neizvestnyjj-tot-u-kogo-glaza-veliki.ogg
+
+- type: jukebox
+  id: norma_tale
+  name: (Chaos) Norma Tale - Кисточка
+  path:
+    path: /Audio/_Chaos/Jukebox/norma-tale-kistochka.ogg
+
+- type: jukebox
+  id: satisfakciya
+  name: (Chaos) Сатисфакция - Нечего терять
+  path:
+    path: /Audio/_Chaos/Jukebox/satisfakciya-nechego-teryat.ogg
+
+- type: jukebox
+  id: modus_operandi
+  name: (Chaos) The DJ Producer - Modus Operandi
+  path:
+    path: /Audio/_Chaos/Jukebox/the-dj-producer-modus-operandi.ogg
+# Chaos-end
