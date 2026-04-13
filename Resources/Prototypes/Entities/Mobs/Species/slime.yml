@@ -152,6 +152,7 @@
     bloodReagent: Slime # TODO Color slime blood based on their slime color or smth
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
+    bleedReductionAmount: 0.2
   - type: Barotrauma
     damage:
       types:

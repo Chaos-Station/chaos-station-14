@@ -47,3 +47,4 @@
         Bloodloss: -1
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
+    bleedReductionAmount: 0.2

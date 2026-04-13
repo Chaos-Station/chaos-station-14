@@ -107,6 +107,7 @@
   - type: Bloodstream
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
+    bleedReductionAmount: 0.2
     bloodlossDamage:
       types:
         Bloodloss: 1
