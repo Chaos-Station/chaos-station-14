@@ -93,6 +93,7 @@
   - type: Bloodstream
     bloodMaxVolume: 200
     bloodReagent: CopperBlood
+    bloodRefreshAmount: 0.5
   # Damage (Others)
   - type: MeleeWeapon
     animation: WeaponArcBite

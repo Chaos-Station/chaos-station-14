@@ -49,6 +49,7 @@
   - type: Bloodstream
     bloodReagent: InsectBlood
     bloodMaxVolume: 200
+    bloodRefreshAmount: 0.5
   - type: Vocal
     sounds:
       Male: UnisexChitinid

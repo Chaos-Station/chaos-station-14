@@ -186,6 +186,7 @@
   - type: Bloodstream
     bloodReagent: AmmoniaBlood
     bloodMaxVolume: 200
+    bloodRefreshAmount: 0.5
   - type: MeleeWeapon
     soundHit:
       collection: AlienClaw

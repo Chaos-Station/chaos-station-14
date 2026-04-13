@@ -161,6 +161,7 @@
   - type: Bloodstream
     bloodReagent: InsectBlood
     bloodMaxVolume: 200
+    bloodRefreshAmount: 0.5
 #  - type: DamageVisuals
 #    damageOverlayGroups:
 #      Brute:
