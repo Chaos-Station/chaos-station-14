@@ -159,6 +159,7 @@
           - Bottle
           - PillCanister
           - MedicalPatch # Goobstation
+          - CSMedipen # CS-Tweak
   - type: AutomationSlots # Goobstation
     slots:
     - !type:AutomatedSolution
