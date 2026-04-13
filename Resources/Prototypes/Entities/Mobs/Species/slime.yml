@@ -150,6 +150,7 @@
   #        sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
   - type: Bloodstream
     bloodReagent: Slime # TODO Color slime blood based on their slime color or smth
+    bloodMaxVolume: 200
   - type: Barotrauma
     damage:
       types:

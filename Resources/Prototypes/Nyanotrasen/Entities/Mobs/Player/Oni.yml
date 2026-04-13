@@ -38,3 +38,11 @@
   - type: NpcFactionMember
     factions:
     - NanoTrasen
+  - type: Bloodstream
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.5
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
+    bloodMaxVolume: 200

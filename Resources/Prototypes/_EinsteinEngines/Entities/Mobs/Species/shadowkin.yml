@@ -105,6 +105,7 @@
       types:
         Blunt: 0.35 # per second, scales with pressure and other constants.
   - type: Bloodstream
+    bloodMaxVolume: 200
     bloodlossDamage:
       types:
         Bloodloss: 1

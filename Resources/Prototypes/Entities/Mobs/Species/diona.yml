@@ -75,6 +75,7 @@
         amount: 5
   - type: Bloodstream
     bloodReagent: Sap
+    bloodMaxVolume: 200
   - type: Reactive
     groups:
       Flammable: [ Touch ]

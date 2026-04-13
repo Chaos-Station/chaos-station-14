@@ -48,6 +48,7 @@
       amount: 5
   - type: Bloodstream
     bloodReagent: InsectBlood
+    bloodMaxVolume: 200
   - type: Vocal
     sounds:
       Male: UnisexChitinid

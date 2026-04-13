@@ -143,6 +143,14 @@
             sprite: _White/Mobs/Species/displacement.rsi
             state: shoes
     # Goob-Feroxi-Resprite-End
+  - type: Bloodstream
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.5
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
+    bloodMaxVolume: 200
 
 - type: entity
   parent: MobHumanDummy

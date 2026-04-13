@@ -86,6 +86,14 @@
         - MobMask
         layer:
         - MobLayer
+  - type: Bloodstream
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.5
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
+    bloodMaxVolume: 200
 
 - type: entity
   parent: BaseSpeciesDummy

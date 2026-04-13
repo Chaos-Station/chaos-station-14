@@ -260,6 +260,7 @@
       # Orion-End
   - type: Bloodstream # Goobstation - lore stuff
     bloodReagent: AmmoniaBlood
+    bloodMaxVolume: 200
   - type: MeleeWeapon # Goobstation - aliem raptors probably use their claws
     soundHit:
       collection: AlienClaw

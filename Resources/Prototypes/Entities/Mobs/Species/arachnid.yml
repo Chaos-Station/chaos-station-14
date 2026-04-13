@@ -91,6 +91,7 @@
       - !type:WashCreamPieReaction
   # Damage (Self)
   - type: Bloodstream
+    bloodMaxVolume: 200
     bloodReagent: CopperBlood
   # Damage (Others)
   - type: MeleeWeapon

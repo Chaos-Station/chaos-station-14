@@ -41,3 +41,11 @@
       damageRecovery:
         types:
           Asphyxiation: -1.0
+    - type: Bloodstream
+      bloodlossDamage:
+        types:
+          Bloodloss: 0.5
+      bloodlossHealDamage:
+        types:
+          Bloodloss: -1
+      bloodMaxVolume: 200
