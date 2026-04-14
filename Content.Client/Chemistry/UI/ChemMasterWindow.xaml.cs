@@ -255,6 +255,8 @@ namespace Content.Client.Chemistry.UI
             BuildContainerUI(InputContainerInfo, state.InputContainerInfo, true);
             BuildContainerUI(OutputContainerInfo, state.OutputContainerInfo, false);
 
+            BuildContainerHeader(FillOutputContainerInfo, state.OutputContainerInfo); // CS-Tweak:
+
             BufferInfo.Children.Clear();
 
             // This has to happen here due to people possibly
@@ -337,7 +339,7 @@ namespace Content.Client.Chemistry.UI
 
             // CS-Tweak start
             FillBufferInfo.Children.Clear();
-            if (state.Mode == ChemMasterMode.Fill && reagentList.Any())
+            if (reagentList.Any())
             {
                 rowCount = 0;
                 foreach (var reagent in reagentList)
@@ -348,8 +350,8 @@ namespace Content.Client.Chemistry.UI
             else
             {
                 FillBufferInfo.Children.Add(new Label { Text = Loc.GetString("chem-master-window-buffer-empty-text") });
-                // CS-Tweak end
             }
+            // CS-Tweak end
         }
 
         private void BuildContainerUI(Control control, ContainerInfo? info, bool addReagentButtons)
@@ -387,7 +389,7 @@ namespace Content.Client.Chemistry.UI
             {
                 foreach (var (id, quantity) in info.Entities.Select(x => (x.Id, x.Quantity)))
                 {
-                    control.Children.Add(BuildReagentRow(default(Color), rowCount++, id, default(ReagentId), quantity, ChemMasterTarget.Buffer, addReagentButtons)); // CS-Tweak
+                    control.Children.Add(BuildReagentRow(default(Color), rowCount++, id, default(ReagentId), quantity, ChemMasterTarget.Container, addReagentButtons)); // CS-Tweak
                 }
             }
 
@@ -400,10 +402,41 @@ namespace Content.Client.Chemistry.UI
                     var name = proto?.LocalizedName ?? Loc.GetString("chem-master-window-unknown-reagent-text");
                     var reagentColor = proto?.SubstanceColor ?? default(Color);
 
-                    control.Children.Add(BuildReagentRow(reagentColor, rowCount++, name, reagent.Reagent, reagent.Quantity, ChemMasterTarget.Buffer, addReagentButtons)); // CS-Tweak
+                    control.Children.Add(BuildReagentRow(reagentColor, rowCount++, name, reagent.Reagent, reagent.Quantity, ChemMasterTarget.Container, addReagentButtons)); // CS-Tweak
                 }
             }
         }
+
+        // CS-Tweak start
+        private void BuildContainerHeader(Control control, ContainerInfo? info)
+        {
+            control.Children.Clear();
+
+            if (info is null)
+            {
+                control.Children.Add(new Label
+                {
+                    Text = Loc.GetString("chem-master-window-no-container-loaded-text")
+                });
+                return;
+            }
+
+            control.Children.Add(new BoxContainer
+            {
+                Orientation = LayoutOrientation.Horizontal,
+                Children =
+                {
+                    new Label { Text = $"{info.DisplayName}: " },
+                    new Label
+                    {
+                        Text = $"{info.CurrentVolume}/{info.MaxVolume}",
+                        StyleClasses = { StyleNano.StyleClassLabelSecondaryColor }
+                    }
+                }
+            });
+        }
+        // CS-Tweak end
+
         /// <summary>
         /// Take reagent/entity data and present rows, labels, and buttons appropriately. todo sprites?
         /// </summary>
