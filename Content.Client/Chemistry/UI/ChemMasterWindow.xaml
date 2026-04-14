@@ -99,7 +99,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 <Label Name="BufferCurrentVolume" StyleClasses="LabelSecondaryColor" />
             </BoxContainer>
 
-            <PanelContainer VerticalExpand="True" MinSize="0 200"> <!-- CS-Tweak -->
+            <PanelContainer> <!-- CS-Tweak -->
                 <PanelContainer.PanelOverride>
                     <gfx:StyleBoxFlat BackgroundColor="#1B1B1E" />
                 </PanelContainer.PanelOverride>
@@ -145,7 +145,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <!-- CS-Tweak start -->
         <BoxContainer Orientation="Vertical" HorizontalExpand="True" Margin="5" SeparationOverride="10">
             <BoxContainer Orientation="Horizontal">
-                <Label Text="{Loc 'chem-master-window-fill-label'}" />
+                <Label Text="{Loc 'chem-master-window-container-label'}" />
                 <Control HorizontalExpand="True"/>
                 <Button MinSize="80 0" Name="FillMedipenButton" Access="Public" Text="{Loc 'chem-master-window-fill-button'}" />
             </BoxContainer>
@@ -156,7 +156,27 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 </PanelContainer.PanelOverride>
 
                 <ScrollContainer HorizontalExpand="True" MinSize="0 200">
-                    <!-- Buffer reagent list for fill -->
+                    <BoxContainer Name="FillOutputContainerInfo" Orientation="Vertical" Margin="4" HorizontalExpand="True">
+                        <Label Text="{Loc 'chem-master-window-no-container-loaded-text'}" />
+                    </BoxContainer>
+                </ScrollContainer>
+            </PanelContainer>
+
+            <!-- отступы -->
+            <Control MinSize="0 10" />
+
+            <!-- буфер -->
+            <BoxContainer Orientation="Horizontal">
+                <Label Text="{Loc 'chem-master-window-buffer-text'}" />
+                <Control HorizontalExpand="True"/>
+            </BoxContainer>
+
+            <PanelContainer VerticalExpand="True" MinSize="0 200">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#1B1B1E" />
+                </PanelContainer.PanelOverride>
+
+                <ScrollContainer HorizontalExpand="True" MinSize="0 200">
                     <BoxContainer Name="FillBufferInfo" Orientation="Vertical" Margin="4" HorizontalExpand="True">
                         <Label Text="{Loc 'chem-master-window-buffer-empty-text'}" />
                     </BoxContainer>
