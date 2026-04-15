@@ -368,6 +368,8 @@ namespace Content.Client.HealthAnalyzer.UI
                 });
             }*/
 
+            AddBloodstreamInfectionCondition(msg);
+
             if (ConditionsListContainer.ChildCount == 0)
             {
                 ConditionsListContainer.AddChild(new RichTextLabel
@@ -420,6 +422,8 @@ namespace Content.Client.HealthAnalyzer.UI
                 });
             }
 
+            AddBloodstreamInfectionCondition(msg);
+
             if (ConditionsListContainer.ChildCount == 0)
             {
                 ConditionsListContainer.AddChild(new RichTextLabel
@@ -447,11 +451,16 @@ namespace Content.Client.HealthAnalyzer.UI
 
             DrawSolutionDiagnostics(msg.Solutions);
 
-            ConditionsListContainer.AddChild(new RichTextLabel
+            AddBloodstreamInfectionCondition(msg);
+
+            if (ConditionsListContainer.ChildCount == 0)
             {
-                Text = Loc.GetString("condition-none"),
-                Margin = new Thickness(0, 4),
-            });
+                ConditionsListContainer.AddChild(new RichTextLabel
+                {
+                    Text = Loc.GetString("condition-none"),
+                    Margin = new Thickness(0, 4),
+                });
+            }
         }
 
         private bool TryGetEntityName(NetEntity ent, out string name)
@@ -475,6 +484,22 @@ namespace Content.Client.HealthAnalyzer.UI
 
             name = Identity.Name(ent, _entityManager);
             return true;
+        }
+
+        private void AddBloodstreamInfectionCondition(HealthAnalyzerBaseMessage msg)
+        {
+            if (msg.BloodstreamInfectionStage is not { } stage || stage <= 0)
+                return;
+
+            var seconds = (int) (msg.BloodstreamInfectionDuration ?? 0);
+            ConditionsListContainer.AddChild(new RichTextLabel
+            {
+                Text = Loc.GetString(
+                    "condition-body-bloodstream-infection",
+                    ("stage", stage),
+                    ("seconds", seconds)),
+                Margin = new Thickness(0, 4),
+            });
         }
         // Shitmed Change End
         private static string GetStatus(MobState mobState)

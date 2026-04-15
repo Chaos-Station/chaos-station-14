@@ -30,3 +30,4 @@ condition-body-bleeding-LeftHand = • Кровотечение из левой 
 condition-body-bleeding-RightHand = • Кровотечение из правой кисти у { $entity }.
 condition-body-bleeding-LeftFoot = • Кровотечение из левой стопы у { $entity }.
 condition-body-bleeding-RightFoot = • Кровотечение из правой стопы у { $entity }.
+condition-body-bloodstream-infection = • Обнаружена инфекция крови: стадия {$stage}, длительность {$seconds} с.
