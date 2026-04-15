@@ -491,11 +491,24 @@ namespace Content.Client.HealthAnalyzer.UI
             if (msg.BloodstreamInfectionStage is not { } stage || stage <= 0)
                 return;
 
+            var stageName = Loc.GetString(GetBloodstreamInfectionStageLocKey(stage));
             ConditionsListContainer.AddChild(new RichTextLabel
             {
-                Text = Loc.GetString("condition-body-bloodstream-infection"),
+                Text = Loc.GetString(
+                    "condition-body-bloodstream-infection",
+                    ("stage", stageName)),
                 Margin = new Thickness(0, 4),
             });
+        }
+
+        private static string GetBloodstreamInfectionStageLocKey(int stage)
+        {
+            return stage switch
+            {
+                1 => "condition-body-bloodstream-infection-stage-infection",
+                2 or 3 => "condition-body-bloodstream-infection-stage-sepsis",
+                _ => "condition-body-bloodstream-infection-stage-putrid-blood",
+            };
         }
         // Shitmed Change End
         private static string GetStatus(MobState mobState)
