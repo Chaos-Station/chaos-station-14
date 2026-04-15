@@ -1,0 +1,27 @@
+- type: entity
+  name: empty medipen
+  parent: ChemicalMedipen
+  id: CSEmptyMedipen
+  description: just empty medipen
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: medipen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    solutionName: pen
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: medipen_empty
+  - type: SolutionContainerManager
+    solutions:
+      pen:
+        maxVol: 15
+  - type: SingleUseHypospray
+  - type: Appearance
+  - type: Tag
+    tags:
+    - Medipen
+    - EmergencyMedipen
+    - CSMedipen

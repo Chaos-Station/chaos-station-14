@@ -58,13 +58,13 @@ namespace Content.Shared.Chemistry
     {
         public readonly ReagentId ReagentId;
         public readonly ChemMasterReagentAmount Amount;
-        public readonly bool FromBuffer;
+        public readonly ChemMasterTarget Target; // CS-Tweak
 
-        public ChemMasterReagentAmountButtonMessage(ReagentId reagentId, ChemMasterReagentAmount amount, bool fromBuffer)
+        public ChemMasterReagentAmountButtonMessage(ReagentId reagentId, ChemMasterReagentAmount amount, ChemMasterTarget target) // CH-Tweak
         {
             ReagentId = reagentId;
             Amount = amount;
-            FromBuffer = fromBuffer;
+            Target = target; // CS-Tweak
         }
     }
 
@@ -96,11 +96,33 @@ namespace Content.Shared.Chemistry
         }
     }
 
+    // CS-Tweak start
+    [Serializable, NetSerializable]
+    public sealed class ChemMasterFillMedipenMessage : BoundUserInterfaceMessage
+    {
+        public readonly string Label;
+
+        public ChemMasterFillMedipenMessage(string label)
+        {
+            Label = label;
+        }
+    }
+    // CS-Tweak end
+
     public enum ChemMasterMode
     {
         Transfer,
         Discard,
+        Fill, // CS-Tweak
     }
+
+    // CS-Tweak start: Added enum for targets in chem masterrrrrrarw~~.
+    public enum ChemMasterTarget
+    {
+        Buffer,
+        Medipen,
+    }
+    // CS-Tweak end
 
     public enum ChemMasterSortingType : byte
     {

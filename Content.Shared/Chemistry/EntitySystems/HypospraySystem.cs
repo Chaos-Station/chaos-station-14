@@ -25,6 +25,7 @@ using Content.Shared.Administration.Logs;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.Components.SolutionManager;
 using Content.Shared.Chemistry.Hypospray.Events;
+using Content.Shared._Chaos.Chemistry.Components;
 using Content.Shared.Database;
 using Content.Goobstation.Maths.FixedPoint;
 using Content.Shared.Forensics;
@@ -113,6 +114,17 @@ public sealed class HypospraySystem : EntitySystem
             if (_useDelay.IsDelayed((uid, delayComp)))
                 return false;
         }
+
+        // CS-Tweak start
+        if (TryComp(uid, out SingleUseHyposprayComponent? singleUseComp))
+        {
+            if (singleUseComp.IsUsed)
+            {
+                _popup.PopupClient(Loc.GetString("single-use-hypospray-already-used"), target, user);
+                return false;
+            }
+        }
+        // CS-Tweak end
 
         string? msgFormat = null;
 
@@ -204,6 +216,13 @@ public sealed class HypospraySystem : EntitySystem
 
         var afterinjectev = new AfterHyposprayInjectsEvent { User = user, Target = target }; //Goobedit
         RaiseLocalEvent(uid, ref afterinjectev);
+
+        // CS-Tweak start
+        if (TryComp(uid, out SingleUseHyposprayComponent? singleUseCompMark))
+        {
+            singleUseCompMark.IsUsed = true;
+        }
+        // CS-Tweak end
 
         // same LogType as syringes...
         _adminLogger.Add(LogType.ForceFeed, $"{ToPrettyString(user):user} injected {ToPrettyString(target):target} with a solution {SharedSolutionContainerSystem.ToPrettyString(removedSolution):removedSolution} using a {ToPrettyString(uid):using}");

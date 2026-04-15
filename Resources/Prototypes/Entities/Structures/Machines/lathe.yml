@@ -865,6 +865,8 @@
   - type: Lathe
     idleState: icon
     runningState: icon
+    staticPacks:
+    - CSEmptyMedipenStatic # CS-Tweak
     dynamicPacks: # Orion-Edit: Static > Dynamic
     - TopicalsStatic
     - ChemistryStatic

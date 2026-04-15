@@ -59,6 +59,7 @@ namespace Content.Client.Chemistry.UI
         private readonly SpriteSystem _sprite;
 
         public event Action<BaseButton.ButtonEventArgs, ReagentButton>? OnReagentButtonPressed;
+        public event Action<int>? OnTabChanged; // CS-Tweak
         public readonly Button[] PillTypeButtons;
 
         private const string PillsRsiPath = "/Textures/Objects/Specific/Chemistry/pills.rsi";
@@ -118,16 +119,19 @@ namespace Content.Client.Chemistry.UI
             PillNumber.InitDefaultButtons();
             BottleDosage.InitDefaultButtons();
 
+            Tabs.OnTabChanged += index => OnTabChanged?.Invoke(index); // CS-Tweak
+
             // Ensure label length is within the character limit.
             LabelLineEdit.IsValid = s => s.Length <= SharedChemMaster.LabelMaxLength;
 
             Tabs.SetTabTitle(0, Loc.GetString("chem-master-window-input-tab"));
             Tabs.SetTabTitle(1, Loc.GetString("chem-master-window-output-tab"));
+            Tabs.SetTabTitle(2, Loc.GetString("chem-master-window-fill-tab")); // CS-Tweak
         }
 
-        private ReagentButton MakeReagentButton(string text, ChemMasterReagentAmount amount, ReagentId id, bool isBuffer, string styleClass)
+        private ReagentButton MakeReagentButton(string text, ChemMasterReagentAmount amount, ReagentId id, ChemMasterTarget target, string styleClass) // // CS-Tweak: bool isBuffer -> ChemMasterTarget target
         {
-            var reagentTransferButton = new ReagentButton(text, amount, id, isBuffer, styleClass);
+            var reagentTransferButton = new ReagentButton(text, amount, id, target, styleClass); // CS-Tweak: isBuffer -> target
             reagentTransferButton.OnPressed += args
                 => OnReagentButtonPressed?.Invoke(args, reagentTransferButton);
             return reagentTransferButton;
@@ -136,7 +140,7 @@ namespace Content.Client.Chemistry.UI
         /// Conditionally generates a set of reagent buttons based on the supplied boolean argument.
         /// This was moved outside of BuildReagentRow to facilitate conditional logic, stops indentation depth getting out of hand as well.
         /// </summary>
-        private List<ReagentButton> CreateReagentTransferButtons(ReagentId reagent, bool isBuffer, bool addReagentButtons)
+        private List<ReagentButton> CreateReagentTransferButtons(ReagentId reagent, ChemMasterTarget target, bool addReagentButtons) // bool isBuffer -> ChemMasterTarget target
         {
             if (!addReagentButtons)
                 return new List<ReagentButton>(); // Return an empty list if reagentTransferButton creation is disabled.
@@ -159,7 +163,7 @@ namespace Content.Client.Chemistry.UI
 
             foreach (var (text, amount, styleClass) in buttonConfigs)
             {
-                var reagentTransferButton = MakeReagentButton(text, amount, reagent, isBuffer, styleClass);
+                var reagentTransferButton = MakeReagentButton(text, amount, reagent, target, styleClass); // CS-Tweak: isBuffer -> target
                 buttons.Add(reagentTransferButton);
             }
 
@@ -267,6 +271,10 @@ namespace Content.Client.Chemistry.UI
             if (!state.BufferReagents.Any())
             {
                 BufferInfo.Children.Add(new Label { Text = Loc.GetString("chem-master-window-buffer-empty-text") });
+                // CS-Tweak start
+                FillBufferInfo.Children.Clear();
+                FillBufferInfo.Children.Add(new Label { Text = Loc.GetString("chem-master-window-buffer-empty-text") });
+                // CS-Tweak end
 
                 return;
             }
@@ -324,7 +332,23 @@ namespace Content.Client.Chemistry.UI
             var rowCount = 0;
             foreach (var reagent in reagentList)
             {
-                BufferInfo.Children.Add(BuildReagentRow(reagent.color, rowCount++, reagent.name, reagent.reagentId, reagent.quantity, true, true));
+                BufferInfo.Children.Add(BuildReagentRow(reagent.color, rowCount++, reagent.name, reagent.reagentId, reagent.quantity, ChemMasterTarget.Buffer, true));
+            }
+
+            // CS-Tweak start
+            FillBufferInfo.Children.Clear();
+            if (state.Mode == ChemMasterMode.Fill && reagentList.Any())
+            {
+                rowCount = 0;
+                foreach (var reagent in reagentList)
+                {
+                    FillBufferInfo.Children.Add(BuildReagentRow(reagent.color, rowCount++, reagent.name, reagent.reagentId, reagent.quantity, ChemMasterTarget.Medipen, true));
+                }
+            }
+            else
+            {
+                FillBufferInfo.Children.Add(new Label { Text = Loc.GetString("chem-master-window-buffer-empty-text") });
+                // CS-Tweak end
             }
         }
 
@@ -363,7 +387,7 @@ namespace Content.Client.Chemistry.UI
             {
                 foreach (var (id, quantity) in info.Entities.Select(x => (x.Id, x.Quantity)))
                 {
-                    control.Children.Add(BuildReagentRow(default(Color), rowCount++, id, default(ReagentId), quantity, false, addReagentButtons));
+                    control.Children.Add(BuildReagentRow(default(Color), rowCount++, id, default(ReagentId), quantity, ChemMasterTarget.Buffer, addReagentButtons)); // CS-Tweak
                 }
             }
 
@@ -376,14 +400,14 @@ namespace Content.Client.Chemistry.UI
                     var name = proto?.LocalizedName ?? Loc.GetString("chem-master-window-unknown-reagent-text");
                     var reagentColor = proto?.SubstanceColor ?? default(Color);
 
-                    control.Children.Add(BuildReagentRow(reagentColor, rowCount++, name, reagent.Reagent, reagent.Quantity, false, addReagentButtons));
+                    control.Children.Add(BuildReagentRow(reagentColor, rowCount++, name, reagent.Reagent, reagent.Quantity, ChemMasterTarget.Buffer, addReagentButtons)); // CS-Tweak
                 }
             }
         }
         /// <summary>
         /// Take reagent/entity data and present rows, labels, and buttons appropriately. todo sprites?
         /// </summary>
-        private Control BuildReagentRow(Color reagentColor, int rowCount, string name, ReagentId reagent, FixedPoint2 quantity, bool isBuffer, bool addReagentButtons)
+        private Control BuildReagentRow(Color reagentColor, int rowCount, string name, ReagentId reagent, FixedPoint2 quantity, ChemMasterTarget target, bool addReagentButtons) // CS-Tweak
         {
             //Colors rows and sets fallback for reagentcolor to the same as background, this will hide colorPanel for entities hopefully
             var rowColor1 = Color.FromHex("#1B1B1E");
@@ -394,7 +418,7 @@ namespace Content.Client.Chemistry.UI
                 reagentColor = currentRowColor;
             }
             //this calls the separated button builder, and stores the return to render after labels
-            var reagentButtonConstructors = CreateReagentTransferButtons(reagent, isBuffer, addReagentButtons);
+            var reagentButtonConstructors = CreateReagentTransferButtons(reagent, target, addReagentButtons); // CS-Tweak
 
             // Create the row layout with the color panel
             var rowContainer = new BoxContainer
@@ -449,15 +473,15 @@ namespace Content.Client.Chemistry.UI
     public sealed class ReagentButton : Button
     {
         public ChemMasterReagentAmount Amount { get; set; }
-        public bool IsBuffer = true;
+        public ChemMasterTarget Target { get; set; } // CS-Tweak
         public ReagentId Id { get; set; }
-        public ReagentButton(string text, ChemMasterReagentAmount amount, ReagentId id, bool isBuffer, string styleClass)
+        public ReagentButton(string text, ChemMasterReagentAmount amount, ReagentId id, ChemMasterTarget target, string styleClass) // CS-Tweak
         {
             AddStyleClass(styleClass);
             Text = text;
             Amount = amount;
             Id = id;
-            IsBuffer = isBuffer;
+            Target = target; // CS-Tweak
         }
     }
 }
