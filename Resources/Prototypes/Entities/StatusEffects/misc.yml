@@ -53,6 +53,24 @@
   - type: StunnedStatusEffect
   - type: KnockdownStatusEffect
 
+- type: entity
+  parent: MobStatusEffectDebuff
+  id: StatusEffectBloodlossFaint
+  name: bloodloss faint
+  components:
+  - type: ForcedSleepingStatusEffect
+  - type: StunnedStatusEffect
+  - type: KnockdownStatusEffect
+
+- type: entity
+  parent: MobStatusEffectDebuff
+  id: StatusEffectBloodlossCriticalSleep
+  name: critical bloodloss
+  components:
+  - type: ForcedSleepingStatusEffect
+  - type: StunnedStatusEffect
+  - type: KnockdownStatusEffect
+
 # This creature is asleep because it's disconnected from the game.
 - type: entity
   parent: MobStatusEffectBase # Not even rejuvenate can cure SSD...

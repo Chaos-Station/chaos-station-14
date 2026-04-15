@@ -12,6 +12,15 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
 namespace Content.Shared.Body.Components;
 
+public enum BloodlossStage : byte
+{
+    None,
+    Stage1,
+    Stage2,
+    Stage3,
+    Stage4,
+}
+
 /// <summary>
 /// Gives an entity a bloodstream.
 /// </summary>
@@ -203,6 +212,12 @@ public sealed partial class BloodstreamComponent : Component
     /// </summary>
     [DataField, AutoNetworkedField]
     public TimeSpan StatusTime;
+
+    /// <summary>
+    /// Current bloodloss stage, calculated from the percentage of blood remaining.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public BloodlossStage CurrentBloodlossStage;
 
     /// <summary>
     /// Alert to show when bleeding.

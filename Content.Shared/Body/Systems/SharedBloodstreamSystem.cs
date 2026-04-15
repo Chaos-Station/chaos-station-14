@@ -1,6 +1,7 @@
 using Content.Goobstation.Common.Bloodstream;
 using Content.Goobstation.Common.CCVar; // Goobstation
 using Content.Goobstation.Maths.FixedPoint;
+using System.Numerics;
 using Content.Shared._Shitmed.Body;
 using Content.Shared._Shitmed.Damage;
 using Content.Shared._Shitmed.Medical.Surgery.Consciousness;
@@ -10,6 +11,7 @@ using Content.Shared._Shitmed.Targeting;
 using Content.Shared.Alert;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Events;
+using Content.Shared.Camera;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
@@ -19,10 +21,11 @@ using Content.Shared.Fluids;
 using Content.Shared.Forensics.Components;
 using Content.Shared.HealthExaminable;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Random.Helpers;
 using Content.Shared.Rejuvenate;
-using Content.Shared.Speech.EntitySystems;
+using Content.Shared.StatusEffectNew;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
@@ -36,17 +39,22 @@ namespace Content.Shared.Body.Systems;
 
 public abstract partial class SharedBloodstreamSystem : EntitySystem
 {
+    private static readonly EntProtoId BloodlossHallucinationStatusEffect = "StatusEffectSeeingRainbow";
+
     [Dependency] protected readonly SharedSolutionContainerSystem SolutionContainer = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
+    [Dependency] private readonly SharedContentEyeSystem _contentEye = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly SharedPuddleSystem _puddle = default!;
     [Dependency] private readonly AlertsSystem _alertsSystem = default!;
     [Dependency] private readonly MobStateSystem _mobStateSystem = default!;
     [Dependency] private readonly DamageableSystem _damageableSystem = default!;
     [Dependency] private readonly SharedDrunkSystem _drunkSystem = default!;
-    [Dependency] private readonly SharedStutteringSystem _stutteringSystem = default!;
+    [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
+    [Dependency] private readonly MovementSpeedModifierSystem _movementSpeedModifier = default!;
+
 
     private float _bloodlossMultiplier = 4f; // Goobstation
 
@@ -63,6 +71,8 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         SubscribeLocalEvent<BloodstreamComponent, BeingGibbedEvent>(OnBeingGibbed);
         SubscribeLocalEvent<BloodstreamComponent, ApplyMetabolicMultiplierEvent>(OnApplyMetabolicMultiplier);
         SubscribeLocalEvent<BloodstreamComponent, RejuvenateEvent>(OnRejuvenate);
+        SubscribeLocalEvent<BloodstreamComponent, GetEyeOffsetEvent>(OnGetEyeOffset);
+        SubscribeLocalEvent<BloodstreamComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshMovementSpeedModifiers);
 
         InitializeWounds();
 
@@ -104,6 +114,8 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
             // deal bloodloss damage if their blood level is below a threshold.
             var bloodPercentage = GetBloodLevelPercentage((uid, bloodstream));
+            UpdateBloodlossStage((uid, bloodstream), GetBloodlossStage(bloodPercentage));
+
             if (bloodPercentage < bloodstream.BloodlossThreshold && !_mobStateSystem.IsDead(uid))
             {
                 // bloodloss damage is based on the base value, and modified by how low your blood level is.
@@ -118,19 +130,6 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
                 _damageableSystem.TryChangeDamage(uid, amt,
                     ignoreResistances: false, interruptsDoAfters: false,
                     splitDamage: SplitDamageBehavior.SplitEnsureAll, targetPart: TargetBodyPart.All);
-
-                // Apply dizziness as a symptom of bloodloss.
-                // The effect is applied in a way that it will never be cleared without being healthy.
-                // Multiplying by 2 is arbitrary but works for this case, it just prevents the time from running out
-                _drunkSystem.TryApplyDrunkenness(
-                    uid,
-                    (float)bloodstream.AdjustedUpdateInterval.TotalSeconds * 2,
-                    applySlur: false);
-                _stutteringSystem.DoStutter(uid, bloodstream.AdjustedUpdateInterval * 2, refresh: false);
-
-                // storing the drunk and stutter time so we can remove it independently from other effects additions
-                bloodstream.StatusTime += bloodstream.AdjustedUpdateInterval * 2;
-                DirtyField(uid, bloodstream, nameof(BloodstreamComponent.StatusTime));
             }
             else if (!_mobStateSystem.IsDead(uid))
             {
@@ -143,11 +142,31 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
                     ignoreBlockers: true,
                     targetPart: TargetBodyPart.All,
                     splitDamage: SplitDamageBehavior.SplitEnsureAll); // Shitmed Change
+            }
 
-                // Remove the drunk effect when healthy. Should only remove the amount of drunk and stutter added by low blood level
+            if (bloodstream.CurrentBloodlossStage != BloodlossStage.None && !_mobStateSystem.IsDead(uid))
+            {
+                // Apply dizziness as a symptom of bloodloss.
+                // The effect is applied in a way that it will never be cleared without being healthy.
+                // Multiplying by 2 is arbitrary but works for this case, it just prevents the time from running out
+                _drunkSystem.TryApplyDrunkenness(
+                    uid,
+                    (float) bloodstream.AdjustedUpdateInterval.TotalSeconds * 2,
+                    applySlur: false);
+                _statusEffects.TryUpdateStatusEffectDuration(
+                    uid,
+                    BloodlossHallucinationStatusEffect,
+                    bloodstream.AdjustedUpdateInterval * 2);
+
+                // storing the drunk time so we can remove it independently from other effects additions
+                bloodstream.StatusTime += bloodstream.AdjustedUpdateInterval * 2;
+                DirtyField(uid, bloodstream, nameof(BloodstreamComponent.StatusTime));
+            }
+            else if (!_mobStateSystem.IsDead(uid) && bloodstream.StatusTime > TimeSpan.Zero)
+            {
+                // Remove the bloodloss-only effects when the dedicated bloodloss stages are gone.
                 _drunkSystem.TryRemoveDrunkenessTime(uid, bloodstream.StatusTime.TotalSeconds);
-                _stutteringSystem.DoRemoveStutterTime(uid, bloodstream.StatusTime.TotalSeconds);
-                // Reset the drunk and stutter time to zero
+                _statusEffects.TryRemoveStatusEffect(uid, BloodlossHallucinationStatusEffect);
                 bloodstream.StatusTime = TimeSpan.Zero;
                 DirtyField(uid, bloodstream, nameof(BloodstreamComponent.StatusTime));
             }
@@ -211,6 +230,12 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         }
 
         UpdateWounds(frameTime);
+    }
+
+    public override void FrameUpdate(float frameTime)
+    {
+        base.FrameUpdate(frameTime);
+        UpdateBloodlossEyeOffsets();
     }
 
     private void OnMapInit(Entity<BloodstreamComponent> ent, ref MapInitEvent args)
@@ -380,6 +405,20 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.UpdateIntervalMultiplier));
     }
 
+    private void OnGetEyeOffset(Entity<BloodstreamComponent> ent, ref GetEyeOffsetEvent args)
+    {
+        if (ent.Comp.CurrentBloodlossStage == BloodlossStage.None)
+            return;
+
+        var time = (float) _timing.CurTime.TotalSeconds;
+        var amplitude = GetBloodlossEyeOffsetAmplitude(ent.Comp.CurrentBloodlossStage);
+        var speed = GetBloodlossEyeOffsetFrequency(ent.Comp.CurrentBloodlossStage);
+
+        args.Offset += new Vector2(
+            MathF.Sin(time * speed) * amplitude,
+            MathF.Cos(time * speed * 0.8f) * amplitude * 0.45f);
+    }
+
     private void OnRejuvenate(Entity<BloodstreamComponent> ent, ref RejuvenateEvent args)
     {
         TryModifyBleedAmount(ent.AsNullable(), -ent.Comp.BleedAmount);
@@ -389,6 +428,13 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
         if (SolutionContainer.ResolveSolution(ent.Owner, ent.Comp.ChemicalSolutionName, ref ent.Comp.ChemicalSolution))
             SolutionContainer.RemoveAllSolution(ent.Comp.ChemicalSolution.Value);
+    }
+
+    private void OnRefreshMovementSpeedModifiers(Entity<BloodstreamComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
+    {
+        var modifier = GetBloodlossMovementModifier(ent.Comp.CurrentBloodlossStage);
+        if (modifier < 1f)
+            args.ModifySpeed(modifier);
     }
 
     /// <summary>
@@ -403,6 +449,77 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         }
 
         return bloodSolution.FillFraction;
+    }
+
+    public BloodlossStage GetBloodlossStage(float bloodPercentage)
+    {
+        return bloodPercentage switch
+        {
+            <= 0.20f => BloodlossStage.Stage4,
+            <= 0.35f => BloodlossStage.Stage3,
+            <= 0.50f => BloodlossStage.Stage2,
+            <= 0.75f => BloodlossStage.Stage1,
+            _ => BloodlossStage.None,
+        };
+    }
+
+    private void UpdateBloodlossStage(Entity<BloodstreamComponent> ent, BloodlossStage stage)
+    {
+        if (ent.Comp.CurrentBloodlossStage == stage)
+            return;
+
+        ent.Comp.CurrentBloodlossStage = stage;
+        DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.CurrentBloodlossStage));
+        _movementSpeedModifier.RefreshMovementSpeedModifiers(ent);
+
+        if (TryComp<EyeComponent>(ent, out var eye))
+            _contentEye.UpdateEyeOffset((ent, eye));
+    }
+
+    private static float GetBloodlossMovementModifier(BloodlossStage stage)
+    {
+        return stage switch
+        {
+            BloodlossStage.Stage1 => 0.85f,
+            BloodlossStage.Stage2 => 0.65f,
+            BloodlossStage.Stage3 => 0.50f,
+            BloodlossStage.Stage4 => 0.50f,
+            _ => 1f,
+        };
+    }
+
+    private void UpdateBloodlossEyeOffsets()
+    {
+        var query = EntityQueryEnumerator<BloodstreamComponent, EyeComponent>();
+        while (query.MoveNext(out var uid, out var bloodstream, out var eye))
+        {
+            if (bloodstream.CurrentBloodlossStage != BloodlossStage.None || eye.Offset != Vector2.Zero)
+                _contentEye.UpdateEyeOffset((uid, eye));
+        }
+    }
+
+    private static float GetBloodlossEyeOffsetAmplitude(BloodlossStage stage)
+    {
+        return stage switch
+        {
+            BloodlossStage.Stage1 => 0.025f,
+            BloodlossStage.Stage2 => 0.045f,
+            BloodlossStage.Stage3 => 0.07f,
+            BloodlossStage.Stage4 => 0.095f,
+            _ => 0f,
+        };
+    }
+
+    private static float GetBloodlossEyeOffsetFrequency(BloodlossStage stage)
+    {
+        return stage switch
+        {
+            BloodlossStage.Stage1 => 1.6f,
+            BloodlossStage.Stage2 => 2.1f,
+            BloodlossStage.Stage3 => 2.7f,
+            BloodlossStage.Stage4 => 3.3f,
+            _ => 0f,
+        };
     }
 
     /// <summary>
