@@ -1531,4 +1531,22 @@
         damage:
           types:
             Poison: 0.5
+
+- type: reagent
+  id: Ceffenaf
+  name: reagent-name-ceffenaf
+  group: Medicine
+  desc: reagent-desc-ceffenaf
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: medicine
+  color: "#7aa67a"
+
+- type: reagent
+  id: Terbinar
+  name: reagent-name-terbinar
+  group: Medicine
+  desc: reagent-desc-terbinar
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: medicine
+  color: "#9cc86f"
 # </Viro>

@@ -105,3 +105,7 @@ reagent-desc-spaceacilin = Commonly used and effective anti-bacterial medicine. 
 
 reagent-name-devirate = devirate
 reagent-desc-devirate = Anti-viral medicine. Slightly toxic.
+reagent-name-ceffenaf = ceffenaf
+reagent-desc-ceffenaf = A staged anti-infection medicine. Once 14 units are in the bloodstream, it rolls back one bloodstream infection stage after a short delay.
+reagent-name-terbinar = terbinar
+reagent-desc-terbinar = A simple antiseptic. 10 units in the bloodstream will cure first-stage bloodstream infection.

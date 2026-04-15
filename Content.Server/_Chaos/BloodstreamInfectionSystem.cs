@@ -3,6 +3,8 @@ using Content.Server.Body.Systems;
 using Content.Shared._Chaos;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.Eye.Blinding.Systems;
@@ -20,7 +22,14 @@ namespace Content.Server._Chaos;
 public sealed class BloodstreamInfectionSystem : EntitySystem
 {
     private const string InfectionPainModifierId = "BloodstreamInfection";
+    private const string CeffenafReagentId = "Ceffenaf";
+    private const string TerbinarReagentId = "Terbinar";
+    private static readonly ReagentId CeffenafReagent = new(CeffenafReagentId, null);
+    private static readonly ReagentId TerbinarReagent = new(TerbinarReagentId, null);
+    private static readonly FixedPoint2 CeffenafRequiredQuantity = FixedPoint2.New(14);
+    private static readonly FixedPoint2 TerbinarRequiredQuantity = FixedPoint2.New(10);
     private static readonly TimeSpan InfectionAttemptInterval = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan CeffenafRollbackDelay = TimeSpan.FromSeconds(60);
 
     private static readonly TimeSpan InfectionStage2Start = TimeSpan.FromSeconds(45);
     private static readonly TimeSpan InfectionStage3Start = TimeSpan.FromSeconds(90);
@@ -38,6 +47,7 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
     [Dependency] private readonly SharedBodySystem _body = default!;
     [Dependency] private readonly BloodstreamSystem _bloodstream = default!;
     [Dependency] private readonly DamageableSystem _damageable = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly LegacyStatusEffectsSystem _legacyStatusEffects = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
@@ -68,6 +78,7 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
 
             TryRollBloodstreamInfection(uid, bloodstream, infection, curTime);
             UpdateInfectionStage(uid, infection, curTime);
+            ProcessTreatments(uid, bloodstream, infection, curTime);
             ProcessInfectionEffects(uid, infection, curTime);
         }
     }
@@ -131,6 +142,8 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         infection.NextInfectionAttempt = TimeSpan.Zero;
         infection.NextToxinDamage = TimeSpan.Zero;
         infection.NextFaintAttempt = TimeSpan.Zero;
+        infection.PendingCeffenafRollbackTime = TimeSpan.Zero;
+        infection.PendingCeffenafTargetStage = BloodstreamInfectionStage.None;
         infection.LastProcessedStage = BloodstreamInfectionStage.None;
 
         SetCurrentStage(uid, infection, stage);
@@ -186,6 +199,46 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
                 _statusEffects.TrySetStatusEffectDuration(uid, InfectionComaStatusEffect, InfectionComaRefreshDuration);
                 break;
         }
+    }
+
+    private void ProcessTreatments(EntityUid uid, BloodstreamComponent bloodstream, BloodstreamInfectionComponent infection, TimeSpan curTime)
+    {
+        TryApplyPendingCeffenaf(uid, infection, curTime);
+
+        if (!infection.Infected)
+            return;
+
+        if (!_solutionContainer.ResolveSolution(uid, bloodstream.ChemicalSolutionName, ref bloodstream.ChemicalSolution, out var chemicalSolution))
+            return;
+
+        if (infection.CurrentStage == BloodstreamInfectionStage.Stage1
+            && chemicalSolution.GetReagentQuantity(TerbinarReagent) >= TerbinarRequiredQuantity)
+        {
+            _solutionContainer.RemoveReagent(bloodstream.ChemicalSolution.Value, TerbinarReagentId, TerbinarRequiredQuantity);
+            ClearInfection(uid, infection);
+            return;
+        }
+
+        if (infection.PendingCeffenafRollbackTime == TimeSpan.Zero
+            && chemicalSolution.GetReagentQuantity(CeffenafReagent) >= CeffenafRequiredQuantity)
+        {
+            _solutionContainer.RemoveReagent(bloodstream.ChemicalSolution.Value, CeffenafReagentId, CeffenafRequiredQuantity);
+            infection.PendingCeffenafTargetStage = GetRolledBackStage(infection.CurrentStage);
+            infection.PendingCeffenafRollbackTime = curTime + CeffenafRollbackDelay;
+        }
+    }
+
+    private void TryApplyPendingCeffenaf(EntityUid uid, BloodstreamInfectionComponent infection, TimeSpan curTime)
+    {
+        if (infection.PendingCeffenafRollbackTime == TimeSpan.Zero || curTime < infection.PendingCeffenafRollbackTime)
+            return;
+
+        infection.PendingCeffenafRollbackTime = TimeSpan.Zero;
+
+        if (!infection.Infected)
+            return;
+
+        ApplyCeffenafRollback(uid, infection, curTime);
     }
 
     private void OnStageChanged(EntityUid uid, BloodstreamInfectionComponent infection, BloodstreamInfectionStage stage)
@@ -284,6 +337,8 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         infection.NextInfectionAttempt = TimeSpan.Zero;
         infection.NextToxinDamage = TimeSpan.Zero;
         infection.NextFaintAttempt = TimeSpan.Zero;
+        infection.PendingCeffenafRollbackTime = TimeSpan.Zero;
+        infection.PendingCeffenafTargetStage = BloodstreamInfectionStage.None;
         infection.LastProcessedStage = BloodstreamInfectionStage.None;
         SetCurrentStage(uid, infection, BloodstreamInfectionStage.None);
 
@@ -293,19 +348,44 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         _statusEffects.TryRemoveStatusEffect(uid, InfectionComaStatusEffect);
     }
 
+    private void ApplyCeffenafRollback(EntityUid uid, BloodstreamInfectionComponent infection, TimeSpan curTime)
+    {
+        var targetStage = infection.PendingCeffenafTargetStage;
+        infection.PendingCeffenafTargetStage = BloodstreamInfectionStage.None;
+
+        if (targetStage == BloodstreamInfectionStage.None)
+        {
+            ClearInfection(uid, infection);
+            return;
+        }
+
+        if (infection.CurrentStage != BloodstreamInfectionStage.None && infection.CurrentStage <= targetStage)
+            return;
+
+        infection.InfectionStartTime = curTime - GetInfectionStageStart(targetStage);
+        infection.NextToxinDamage = TimeSpan.Zero;
+        infection.NextFaintAttempt = TimeSpan.Zero;
+        SetCurrentStage(uid, infection, targetStage);
+    }
+
+    private static BloodstreamInfectionStage GetRolledBackStage(BloodstreamInfectionStage currentStage)
+    {
+        if (currentStage <= BloodstreamInfectionStage.Stage1)
+            return BloodstreamInfectionStage.None;
+
+        return (BloodstreamInfectionStage) (currentStage - 1);
+    }
+
     private static float GetInfectionChance(float bloodPercentage)
     {
-        if (bloodPercentage <= 0.45f)
-            return 0.65f;
+        if (bloodPercentage <= 0.30f)
+            return 0.45f;
 
-        if (bloodPercentage <= 0.60f)
-            return 0.50f;
-
-        if (bloodPercentage <= 0.75f)
+        if (bloodPercentage <= 0.50f)
             return 0.35f;
 
-        if (bloodPercentage <= 0.90f)
-            return 0.20f;
+        if (bloodPercentage <= 0.70f)
+            return 0.15f;
 
         return 0f;
     }
@@ -332,16 +412,13 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
 
     private static TimeSpan GetInitialInfectionElapsed(float bloodPercentage)
     {
-        if (bloodPercentage <= 0.45f)
-            return InfectionStage5Start;
-
-        if (bloodPercentage <= 0.60f)
+        if (bloodPercentage <= 0.30f)
             return InfectionStage4Start;
 
-        if (bloodPercentage <= 0.75f)
+        if (bloodPercentage <= 0.50f)
             return InfectionStage3Start;
 
-        if (bloodPercentage <= 0.90f)
+        if (bloodPercentage <= 0.70f)
             return InfectionStage2Start;
 
         return TimeSpan.Zero;

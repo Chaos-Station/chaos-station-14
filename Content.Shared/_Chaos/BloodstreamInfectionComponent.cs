@@ -36,6 +36,10 @@ public sealed partial class BloodstreamInfectionComponent : Component
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
     public TimeSpan NextFaintAttempt;
 
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
+    public TimeSpan PendingCeffenafRollbackTime;
+
+    public BloodstreamInfectionStage PendingCeffenafTargetStage;
     public BloodstreamInfectionStage LastProcessedStage;
     public BloodstreamInfectionStage LastVisualizedStage;
 }
