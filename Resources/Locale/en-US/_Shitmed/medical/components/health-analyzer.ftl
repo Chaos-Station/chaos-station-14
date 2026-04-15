@@ -33,4 +33,4 @@ condition-body-bleeding-LeftHand = • {$entity}'s left hand is bleeding.
 condition-body-bleeding-RightHand = • {$entity}'s right hand is bleeding.
 condition-body-bleeding-LeftFoot = • {$entity}'s left foot is bleeding.
 condition-body-bleeding-RightFoot = • {$entity}'s right foot is bleeding.
-condition-body-bloodstream-infection = • Blood infection detected: stage {$stage}, duration {$seconds} s.
+condition-body-bloodstream-infection = • Blood infection detected.

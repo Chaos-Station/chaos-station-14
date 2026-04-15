@@ -491,13 +491,9 @@ namespace Content.Client.HealthAnalyzer.UI
             if (msg.BloodstreamInfectionStage is not { } stage || stage <= 0)
                 return;
 
-            var seconds = (int) (msg.BloodstreamInfectionDuration ?? 0);
             ConditionsListContainer.AddChild(new RichTextLabel
             {
-                Text = Loc.GetString(
-                    "condition-body-bloodstream-infection",
-                    ("stage", stage),
-                    ("seconds", seconds)),
+                Text = Loc.GetString("condition-body-bloodstream-infection"),
                 Margin = new Thickness(0, 4),
             });
         }
