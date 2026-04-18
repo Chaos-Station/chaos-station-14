@@ -67,6 +67,22 @@ namespace Content.Client.Chemistry.UI
                     (uint) _window.BottleDosage.Value, _window.LabelLine));
             _window.BufferSortButton.OnPressed += _ => SendMessage(
                     new ChemMasterSortingTypeCycleMessage());
+            // CS-Tweak start
+            _window.FillMedipenButton.OnPressed += _ => SendMessage(
+                new ChemMasterFillMedipenMessage(_window.LabelLine));
+
+            _window.OnTabChanged += index =>
+            {
+                if (index == 0)
+                {
+                    SendMessage(new ChemMasterSetModeMessage(ChemMasterMode.Transfer));
+                }
+                else if (index == 2)
+                {
+                    SendMessage(new ChemMasterSetModeMessage(ChemMasterMode.Fill));
+                }
+            };
+            // CS-Tweak end
 
             for (uint i = 0; i < _window.PillTypeButtons.Length; i++)
             {
@@ -74,7 +90,7 @@ namespace Content.Client.Chemistry.UI
                 _window.PillTypeButtons[i].OnPressed += _ => SendMessage(new ChemMasterSetPillTypeMessage(pillType));
             }
 
-            _window.OnReagentButtonPressed += (args, button) => SendMessage(new ChemMasterReagentAmountButtonMessage(button.Id, button.Amount, button.IsBuffer));
+            _window.OnReagentButtonPressed += (args, button) => SendMessage(new ChemMasterReagentAmountButtonMessage(button.Id, button.Amount, button.Target)); // CS-Tweak
         }
 
         /// <summary>
