@@ -102,3 +102,6 @@ reagent-desc-immurin = A chemical that boosts your immune system, making it work
 
 reagent-name-spaceacilin = spaceacilin
 reagent-desc-spaceacilin = Commonly used and effective anti-bacterial medicine. Slightly weakens your immunity.
+
+reagent-name-devirate = devirate
+reagent-desc-devirate = Anti-viral medicine. Slightly toxic.
