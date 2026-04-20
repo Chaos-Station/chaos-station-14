@@ -260,9 +260,11 @@
       # Orion-End
   - type: Bloodstream # Goobstation - lore stuff
     bloodReagent: AmmoniaBlood
+    # Chaos-Station-Start
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
     bleedReductionAmount: 0.2
+    # Chaos-Station-End
   - type: MeleeWeapon # Goobstation - aliem raptors probably use their claws
     soundHit:
       collection: AlienClaw

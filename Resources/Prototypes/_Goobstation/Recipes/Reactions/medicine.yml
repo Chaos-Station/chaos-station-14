@@ -472,7 +472,7 @@
       amount: 1
   products:
     Devirate: 2
-
+# Chaos-Station-Start
 - type: reaction
   id: Ceffenaf
   minTemp: 370
@@ -499,3 +499,4 @@
       amount: 5
   products:
     Terbinar: 15
+# Chaos-Station-End

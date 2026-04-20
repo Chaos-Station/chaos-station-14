@@ -48,9 +48,11 @@
       amount: 5
   - type: Bloodstream
     bloodReagent: InsectBlood
+    # Chaos-Station-Start
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
     bleedReductionAmount: 0.2
+    # Chaos-Station-End
   - type: Vocal
     sounds:
       Male: UnisexChitinid

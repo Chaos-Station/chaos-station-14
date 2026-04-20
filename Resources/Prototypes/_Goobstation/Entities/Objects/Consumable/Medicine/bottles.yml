@@ -867,7 +867,7 @@
         reagents:
         - ReagentId: Haloperidol
           Quantity: 30
-
+# Chaos-Station-Start
 - type: entity
   id: ChemistryBottleCeffenaf
   suffix: ceffenaf
@@ -897,3 +897,4 @@
         reagents:
         - ReagentId: Terbinar
           Quantity: 30
+# Chaos-Station-End

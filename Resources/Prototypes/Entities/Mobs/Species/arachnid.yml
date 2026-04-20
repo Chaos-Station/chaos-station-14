@@ -91,10 +91,12 @@
       - !type:WashCreamPieReaction
   # Damage (Self)
   - type: Bloodstream
-    bloodMaxVolume: 200
     bloodReagent: CopperBlood
+    # Chaos-Station-Start
+    bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
     bleedReductionAmount: 0.2
+    # Chaos-Station-End
   # Damage (Others)
   - type: MeleeWeapon
     animation: WeaponArcBite

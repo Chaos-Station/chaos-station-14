@@ -62,6 +62,7 @@
   - type: NpcFactionMember
     factions:
     - NanoTrasen
+  # Chaos-Station-Start
   - type: Bloodstream
     bloodlossDamage:
       types:
@@ -72,3 +73,4 @@
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
     bleedReductionAmount: 0.2
+  # Chaos-Station-End

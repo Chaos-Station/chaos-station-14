@@ -105,9 +105,11 @@
       types:
         Blunt: 0.35 # per second, scales with pressure and other constants.
   - type: Bloodstream
+    # Chaos-Station-Start
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
     bleedReductionAmount: 0.2
+    # Chaos-Station-End
     bloodlossDamage:
       types:
         Bloodloss: 1

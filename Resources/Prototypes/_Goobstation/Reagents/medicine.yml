@@ -1531,7 +1531,7 @@
         damage:
           types:
             Poison: 0.5
-
+# Chaos-Station-Start
 - type: reagent
   id: Ceffenaf
   name: reagent-name-ceffenaf
@@ -1539,7 +1539,7 @@
   desc: reagent-desc-ceffenaf
   physicalDesc: reagent-physical-desc-opaque
   flavor: medicine
-  color: "#7aa67a"
+  color: "#8c000f"
 
 - type: reagent
   id: Terbinar
@@ -1548,5 +1548,6 @@
   desc: reagent-desc-terbinar
   physicalDesc: reagent-physical-desc-opaque
   flavor: medicine
-  color: "#9cc86f"
+  color: "#ffc0cb"
+# Chaos-Station-End
 # </Viro>

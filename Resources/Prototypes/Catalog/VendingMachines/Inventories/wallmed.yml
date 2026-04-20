@@ -24,8 +24,8 @@
     Ointment: 3
     Bloodpack: 3
     ChemistryBottleEpinephrine: 3
-    ChemistryBottleTerbinar: 5
+    ChemistryBottleTerbinar: 5 # Chaos-Station-Tweak
     Syringe: 3
     Tourniquet: 3 #Goobstation - ParamedHypo
   contrabandInventory:
-    PowerCellSmall: 2
+    PowerCellSmall: 2 # Chaos-Station-Tweak

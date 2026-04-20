@@ -75,9 +75,11 @@
         amount: 5
   - type: Bloodstream
     bloodReagent: Sap
+    # Chaos-Station-Start
     bloodMaxVolume: 200
     bloodRefreshAmount: 0.5
     bleedReductionAmount: 0.2
+    # Chaos-Station-Start
   - type: Reactive
     groups:
       Flammable: [ Touch ]
