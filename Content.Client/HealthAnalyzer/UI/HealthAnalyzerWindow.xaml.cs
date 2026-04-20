@@ -368,8 +368,7 @@ namespace Content.Client.HealthAnalyzer.UI
                 });
             }*/
 
-            AddBloodstreamInfectionCondition(msg);
-
+            AddBloodstreamInfectionCondition(msg); // Chaos-Station-Tweak
             if (ConditionsListContainer.ChildCount == 0)
             {
                 ConditionsListContainer.AddChild(new RichTextLabel
@@ -422,7 +421,7 @@ namespace Content.Client.HealthAnalyzer.UI
                 });
             }
 
-            AddBloodstreamInfectionCondition(msg);
+            AddBloodstreamInfectionCondition(msg); // Chaos-Station-Tweak
 
             if (ConditionsListContainer.ChildCount == 0)
             {
@@ -451,8 +450,8 @@ namespace Content.Client.HealthAnalyzer.UI
 
             DrawSolutionDiagnostics(msg.Solutions);
 
-            AddBloodstreamInfectionCondition(msg);
-
+            AddBloodstreamInfectionCondition(msg); // Chaos-Station-Tweak
+            // Chaos-Station-Start
             if (ConditionsListContainer.ChildCount == 0)
             {
                 ConditionsListContainer.AddChild(new RichTextLabel
@@ -461,6 +460,7 @@ namespace Content.Client.HealthAnalyzer.UI
                     Margin = new Thickness(0, 4),
                 });
             }
+            // Chaos-Station-End
         }
 
         private bool TryGetEntityName(NetEntity ent, out string name)
@@ -485,7 +485,7 @@ namespace Content.Client.HealthAnalyzer.UI
             name = Identity.Name(ent, _entityManager);
             return true;
         }
-
+        // Chaos-Station-Start
         private void AddBloodstreamInfectionCondition(HealthAnalyzerBaseMessage msg)
         {
             if (msg.BloodstreamInfectionStage is not { } stage || stage <= 0)
@@ -510,6 +510,7 @@ namespace Content.Client.HealthAnalyzer.UI
                 _ => "condition-body-bloodstream-infection-stage-putrid-blood",
             };
         }
+        // Chaos-Station-End
         // Shitmed Change End
         private static string GetStatus(MobState mobState)
         {

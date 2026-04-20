@@ -213,6 +213,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
             Log.Error("Unable to set bloodstream DNA, solution entity could not be resolved");
     }
 
+    // Chaos-Station-Start
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
@@ -365,6 +366,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
         var handToDrop = _random.Pick(heldHands);
         _hands.TryDrop((uid, hands), handToDrop, checkActionBlocker: false);
     }
+    // Chaos-Station-End
 
     /// <summary>
     /// Get the reagent data for blood that a specific entity should have.

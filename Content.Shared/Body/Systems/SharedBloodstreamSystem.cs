@@ -114,7 +114,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
             // deal bloodloss damage if their blood level is below a threshold.
             var bloodPercentage = GetBloodLevelPercentage((uid, bloodstream));
-            UpdateBloodlossStage((uid, bloodstream), GetBloodlossStage(bloodPercentage));
+            UpdateBloodlossStage((uid, bloodstream), GetBloodlossStage(bloodPercentage)); // Chaos-Station-Tweak
 
             if (bloodPercentage < bloodstream.BloodlossThreshold && !_mobStateSystem.IsDead(uid))
             {
@@ -144,6 +144,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
                     splitDamage: SplitDamageBehavior.SplitEnsureAll); // Shitmed Change
             }
 
+            // Chaos-Station-Start
             if (bloodstream.CurrentBloodlossStage != BloodlossStage.None && !_mobStateSystem.IsDead(uid))
             {
                 // Apply dizziness as a symptom of bloodloss.
@@ -170,6 +171,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
                 bloodstream.StatusTime = TimeSpan.Zero;
                 DirtyField(uid, bloodstream, nameof(BloodstreamComponent.StatusTime));
             }
+            // Chaos-Station-End
 
             // Shitmed Change Start
             var total = FixedPoint2.Zero;
@@ -232,11 +234,13 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         UpdateWounds(frameTime);
     }
 
+    // Chaos-Station-Start
     public override void FrameUpdate(float frameTime)
     {
         base.FrameUpdate(frameTime);
         UpdateBloodlossEyeOffsets();
     }
+    // Chaos-Station-End
 
     private void OnMapInit(Entity<BloodstreamComponent> ent, ref MapInitEvent args)
     {
@@ -405,6 +409,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.UpdateIntervalMultiplier));
     }
 
+    // Chaos-Station-Start
     private void OnGetEyeOffset(Entity<BloodstreamComponent> ent, ref GetEyeOffsetEvent args)
     {
         if (ent.Comp.CurrentBloodlossStage == BloodlossStage.None)
@@ -418,7 +423,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
             MathF.Sin(time * speed) * amplitude,
             MathF.Cos(time * speed * 0.8f) * amplitude * 0.45f);
     }
-
+    // Chaos-Station-End
     private void OnRejuvenate(Entity<BloodstreamComponent> ent, ref RejuvenateEvent args)
     {
         TryModifyBleedAmount(ent.AsNullable(), -ent.Comp.BleedAmount);
@@ -429,13 +434,14 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         if (SolutionContainer.ResolveSolution(ent.Owner, ent.Comp.ChemicalSolutionName, ref ent.Comp.ChemicalSolution))
             SolutionContainer.RemoveAllSolution(ent.Comp.ChemicalSolution.Value);
     }
-
+    // Chaos-Station-Start
     private void OnRefreshMovementSpeedModifiers(Entity<BloodstreamComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
     {
         var modifier = GetBloodlossMovementModifier(ent.Comp.CurrentBloodlossStage);
         if (modifier < 1f)
             args.ModifySpeed(modifier);
     }
+    // Chaos-Station-End
 
     /// <summary>
     /// Returns the current blood level as a percentage (between 0 and 1).
@@ -451,6 +457,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         return bloodSolution.FillFraction;
     }
 
+    // Chaos-Station-Start
     public BloodlossStage GetBloodlossStage(float bloodPercentage)
     {
         return bloodPercentage switch
@@ -521,6 +528,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
             _ => 0f,
         };
     }
+    // Chaos-Station-End
 
     /// <summary>
     /// Setter for the BloodlossThreshold datafield.

@@ -19,7 +19,7 @@ public sealed partial class BloodstreamComponent
 
     [DataField, AutoNetworkedField]
     public float BleedAmountNotFromWounds;
-
+    // Chaos-Station-Start
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
     public TimeSpan NextBloodlossKnockdownAttempt;
 
@@ -33,4 +33,5 @@ public sealed partial class BloodstreamComponent
     public TimeSpan MinimumBloodlossUnconsciousUntil;
 
     public BloodlossStage LastProcessedBloodlossStage;
+    // Chaos-Station-End
 }

@@ -32,8 +32,8 @@ public abstract class HealthAnalyzerBaseMessage : BoundUserInterfaceMessage
         NetEntity? targetEntity,
         float temperature,
         float bloodLevel,
-        int? bloodstreamInfectionStage,
-        float? bloodstreamInfectionDuration,
+        int? bloodstreamInfectionStage, // Chaos-Station-Tweak
+        float? bloodstreamInfectionDuration, // Chaos-Station-Tweak
         bool? scanMode,
         HealthAnalyzerMode activeMode,
         Dictionary<TargetBodyPart, WoundableSeverity>? body,
@@ -66,8 +66,8 @@ public sealed class HealthAnalyzerBodyMessage : HealthAnalyzerBaseMessage
         NetEntity? targetEntity,
         float temperature,
         float bloodLevel,
-        int? bloodstreamInfectionStage,
-        float? bloodstreamInfectionDuration,
+        int? bloodstreamInfectionStage, // Chaos-Station-Tweak
+        float? bloodstreamInfectionDuration, // Chaos-Station-Tweak
         bool? scanMode,
         bool? unrevivable,
         Dictionary<TargetBodyPart, WoundableSeverity>? body,
@@ -76,7 +76,7 @@ public sealed class HealthAnalyzerBodyMessage : HealthAnalyzerBaseMessage
         Dictionary<NetEntity, List<WoundableTraumaData>> traumas,
         Dictionary<NetEntity, FixedPoint2> nervePainFeels,
         NetEntity? selectedPart = null)
-        : base(targetEntity, temperature, bloodLevel, bloodstreamInfectionStage, bloodstreamInfectionDuration, scanMode, HealthAnalyzerMode.Body, body, bleeding, vitalDamage)  // Goobstation
+        : base(targetEntity, temperature, bloodLevel, bloodstreamInfectionStage, bloodstreamInfectionDuration, scanMode, HealthAnalyzerMode.Body, body, bleeding, vitalDamage)  // Goobstation // Chaos-Station-Tweak
     {
         Unrevivable = unrevivable;
         SelectedPart = selectedPart;
@@ -95,14 +95,14 @@ public sealed class HealthAnalyzerOrgansMessage : HealthAnalyzerBaseMessage
         NetEntity? targetEntity,
         float temperature,
         float bloodLevel,
-        int? bloodstreamInfectionStage,
-        float? bloodstreamInfectionDuration,
+        int? bloodstreamInfectionStage, // Chaos-Station-Tweak
+        float? bloodstreamInfectionDuration, // Chaos-Station-Tweak
         bool? scanMode,
         Dictionary<TargetBodyPart, bool> bleeding,
         FixedPoint2 vitalDamage, // Goobstation
         Dictionary<TargetBodyPart, WoundableSeverity>? body,
         Dictionary<NetEntity, OrganTraumaData> organs)
-        : base(targetEntity, temperature, bloodLevel, bloodstreamInfectionStage, bloodstreamInfectionDuration, scanMode, HealthAnalyzerMode.Organs, body, bleeding, vitalDamage) // Goobstation
+        : base(targetEntity, temperature, bloodLevel, bloodstreamInfectionStage, bloodstreamInfectionDuration, scanMode, HealthAnalyzerMode.Organs, body, bleeding, vitalDamage) // Goobstation // Chaos-Station-Tweak
     {
         Organs = organs;
     }
@@ -118,14 +118,14 @@ public sealed class HealthAnalyzerChemicalsMessage : HealthAnalyzerBaseMessage
         NetEntity? targetEntity,
         float temperature,
         float bloodLevel,
-        int? bloodstreamInfectionStage,
-        float? bloodstreamInfectionDuration,
+        int? bloodstreamInfectionStage, // Chaos-Station-Tweak
+        float? bloodstreamInfectionDuration, // Chaos-Station-Tweak
         bool? scanMode,
         Dictionary<TargetBodyPart, bool> bleeding,
         FixedPoint2 vitalDamage, // Goobstation
         Dictionary<TargetBodyPart, WoundableSeverity>? body,
         Dictionary<NetEntity, Solution> solutions)
-        : base(targetEntity, temperature, bloodLevel, bloodstreamInfectionStage, bloodstreamInfectionDuration, scanMode, HealthAnalyzerMode.Chemicals, body, bleeding, vitalDamage) // Goobstation
+        : base(targetEntity, temperature, bloodLevel, bloodstreamInfectionStage, bloodstreamInfectionDuration, scanMode, HealthAnalyzerMode.Chemicals, body, bleeding, vitalDamage) // Goobstation // Chaos-Station-Tweak
     {
         Solutions = solutions;
     }

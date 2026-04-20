@@ -397,6 +397,7 @@ public sealed class HealthAnalyzerSystem : EntitySystem
             vitalDamage = _threshold.CheckVitalDamage(target, damageableComponent);
         // Goobstation end
 
+        // Chaos-Station-Start
         int? bloodstreamInfectionStage = null;
         float? bloodstreamInfectionDuration = null;
         if (TryComp<BloodstreamInfectionComponent>(target, out var bloodstreamInfection) && bloodstreamInfection.Infected)
@@ -404,7 +405,7 @@ public sealed class HealthAnalyzerSystem : EntitySystem
             bloodstreamInfectionStage = (int) bloodstreamInfection.CurrentStage;
             bloodstreamInfectionDuration = (float) (_timing.CurTime - bloodstreamInfection.InfectionStartTime).TotalSeconds;
         }
-
+        // Chaos-Station-End
         switch (mode)
         {
             case HealthAnalyzerMode.Body:
@@ -417,8 +418,8 @@ public sealed class HealthAnalyzerSystem : EntitySystem
                     GetNetEntity(target),
                     bodyTemperature,
                     bloodAmount,
-                    bloodstreamInfectionStage,
-                    bloodstreamInfectionDuration,
+                    bloodstreamInfectionStage, // Chaos-Station-Tweak
+                    bloodstreamInfectionDuration, // Chaos-Station-Tweak
                     scanMode,
                     unrevivable,
                     bodyStatus,
@@ -437,8 +438,8 @@ public sealed class HealthAnalyzerSystem : EntitySystem
                     GetNetEntity(target),
                     bodyTemperature,
                     bloodAmount,
-                    bloodstreamInfectionStage,
-                    bloodstreamInfectionDuration,
+                    bloodstreamInfectionStage, // Chaos-Station-Tweak
+                    bloodstreamInfectionDuration, // Chaos-Station-Tweak
                     scanMode,
                     bleeding,
                     vitalDamage, // Goobstation
@@ -454,8 +455,8 @@ public sealed class HealthAnalyzerSystem : EntitySystem
                     GetNetEntity(target),
                     bodyTemperature,
                     bloodAmount,
-                    bloodstreamInfectionStage,
-                    bloodstreamInfectionDuration,
+                    bloodstreamInfectionStage, // Chaos-Station-Tweak
+                    bloodstreamInfectionDuration, // Chaos-Station-Tweak
                     scanMode,
                     bleeding,
                     vitalDamage, // Goobstation
