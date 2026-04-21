@@ -40,6 +40,8 @@ namespace Content.Shared.Body.Systems;
 public abstract partial class SharedBloodstreamSystem : EntitySystem
 {
     private static readonly EntProtoId BloodlossHallucinationStatusEffect = "StatusEffectSeeingRainbow";
+    private static readonly EntProtoId BloodlossFaintStatusEffect = "StatusEffectBloodlossFaint";
+    private static readonly EntProtoId BloodlossCriticalSleepStatusEffect = "StatusEffectBloodlossCriticalSleep";
 
     [Dependency] protected readonly SharedSolutionContainerSystem SolutionContainer = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -433,6 +435,22 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
         if (SolutionContainer.ResolveSolution(ent.Owner, ent.Comp.ChemicalSolutionName, ref ent.Comp.ChemicalSolution))
             SolutionContainer.RemoveAllSolution(ent.Comp.ChemicalSolution.Value);
+
+        // Chaos-Station-Tweak: debug/rejuvenate healing should not leave bloodloss forced-sleep timers behind.
+        ent.Comp.NextBloodlossKnockdownAttempt = TimeSpan.Zero;
+        ent.Comp.NextBloodlossItemDropAttempt = TimeSpan.Zero;
+        ent.Comp.NextBloodlossFaintAttempt = TimeSpan.Zero;
+        ent.Comp.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
+        ent.Comp.LastProcessedBloodlossStage = BloodlossStage.None;
+        if (ent.Comp.StatusTime > TimeSpan.Zero)
+            _drunkSystem.TryRemoveDrunkenessTime(ent.Owner, ent.Comp.StatusTime.TotalSeconds);
+
+        ent.Comp.StatusTime = TimeSpan.Zero;
+        DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.StatusTime));
+        UpdateBloodlossStage(ent, BloodlossStage.None);
+        _statusEffects.TryRemoveStatusEffect(ent, BloodlossFaintStatusEffect);
+        _statusEffects.TryRemoveStatusEffect(ent, BloodlossCriticalSleepStatusEffect);
+        _statusEffects.TryRemoveStatusEffect(ent, BloodlossHallucinationStatusEffect);
     }
     // Chaos-Station-Start
     private void OnRefreshMovementSpeedModifiers(Entity<BloodstreamComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
@@ -465,7 +483,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
             <= 0.20f => BloodlossStage.Stage4,
             <= 0.35f => BloodlossStage.Stage3,
             <= 0.50f => BloodlossStage.Stage2,
-            <= 0.75f => BloodlossStage.Stage1,
+            <= 0.80f => BloodlossStage.Stage1,
             _ => BloodlossStage.None,
         };
     }
@@ -509,10 +527,10 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     {
         return stage switch
         {
-            BloodlossStage.Stage1 => 0.025f,
-            BloodlossStage.Stage2 => 0.045f,
-            BloodlossStage.Stage3 => 0.07f,
-            BloodlossStage.Stage4 => 0.095f,
+            BloodlossStage.Stage1 => 0.045f,
+            BloodlossStage.Stage2 => 0.08f,
+            BloodlossStage.Stage3 => 0.12f,
+            BloodlossStage.Stage4 => 0.16f,
             _ => 0f,
         };
     }

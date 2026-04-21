@@ -54,6 +54,12 @@
         amount: 5
   - type: Bloodstream
     bloodReagent: Sugar
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
   - type: Reactive
     groups:
       Flammable: [ Touch ]

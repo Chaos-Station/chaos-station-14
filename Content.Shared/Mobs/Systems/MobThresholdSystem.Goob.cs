@@ -31,9 +31,9 @@ public sealed partial class MobThresholdSystem
 
         var criticalParts = new[]
         {
-            BodyPartType.Head,
+            // BodyPartType.Head, // Chaos-Station-Tweak
             BodyPartType.Chest,
-            BodyPartType.Groin
+            // BodyPartType.Groin, // Chaos-Station-Tweak
         };
 
         foreach (var (woundable, _) in _wound.GetAllWoundableChildren(rootPart))

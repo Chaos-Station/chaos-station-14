@@ -66,11 +66,11 @@
   - type: Bloodstream
     bloodlossDamage:
       types:
-        Bloodloss: 0.5
+        Bloodloss: 0.25
     bloodlossHealDamage:
       types:
         Bloodloss: -1
     bloodMaxVolume: 200
-    bloodRefreshAmount: 0.5
+    bloodRefreshAmount: 0.1
     bleedReductionAmount: 0.2
   # Chaos-Station-End

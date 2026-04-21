@@ -185,9 +185,15 @@
   #      sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
   - type: Bloodstream
     bloodReagent: AmmoniaBlood
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
     # Chaos-Station-Start
     bloodMaxVolume: 200
-    bloodRefreshAmount: 0.5
+    bloodRefreshAmount: 0.1
     bleedReductionAmount: 0.2
     # Chaos-Station-End
   - type: MeleeWeapon

@@ -92,9 +92,15 @@
   # Damage (Self)
   - type: Bloodstream
     bloodReagent: CopperBlood
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
     # Chaos-Station-Start
     bloodMaxVolume: 200
-    bloodRefreshAmount: 0.5
+    bloodRefreshAmount: 0.1
     bleedReductionAmount: 0.2
     # Chaos-Station-End
   # Damage (Others)
