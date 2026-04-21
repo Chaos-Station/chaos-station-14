@@ -1,6 +1,7 @@
 using Content.Goobstation.Maths.FixedPoint;
 using Content.Server.Body.Systems;
 using Content.Shared._Chaos;
+using Content.Shared.Bed.Sleep;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
 using Content.Shared.Chemistry.EntitySystems;
@@ -15,7 +16,6 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using LegacyStatusEffectsSystem = Content.Shared.StatusEffect.StatusEffectsSystem;
-using NewStatusEffectsSystem = Content.Shared.StatusEffectNew.StatusEffectsSystem;
 
 namespace Content.Server._Chaos.Bloodstream;
 
@@ -41,9 +41,6 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
     private static readonly TimeSpan InfectionBriefFaintDuration = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan InfectionFaintInterval = TimeSpan.FromSeconds(30);
 
-    private static readonly EntProtoId InfectionFaintStatusEffect = "StatusEffectBloodstreamInfectionFaint";
-    private static readonly EntProtoId InfectionComaStatusEffect = "StatusEffectBloodstreamInfectionComa";
-
     [Dependency] private readonly SharedBodySystem _body = default!;
     [Dependency] private readonly BloodstreamSystem _bloodstream = default!;
     [Dependency] private readonly DamageableSystem _damageable = default!;
@@ -54,7 +51,7 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
     [Dependency] private readonly PainSystem _pain = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
-    [Dependency] private readonly NewStatusEffectsSystem _statusEffects = default!;
+    [Dependency] private readonly SleepingSystem _sleeping = default!;
 
     public override void Initialize()
     {
@@ -117,10 +114,10 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         infection.NextInfectionAttempt = curTime + InfectionAttemptInterval;
         infection.HighestRolledInfectionTier = tier;
         var chance = GetInfectionChance(tier);
-        TryStartInfection(uid, infection, curTime, chance, bloodPercentage);
+        TryStartInfection(uid, infection, curTime, chance);
     }
 
-    private bool TryStartInfection(EntityUid uid, BloodstreamInfectionComponent infection, TimeSpan curTime, float chance, float bloodPercentage)
+    private bool TryStartInfection(EntityUid uid, BloodstreamInfectionComponent infection, TimeSpan curTime, float chance)
     {
         if (!_random.Prob(chance))
             return false;
@@ -196,15 +193,17 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
                 EnsureBlindness(uid);
                 TryProcessTimedEffect(ref infection.NextFaintAttempt, curTime, InfectionFaintInterval, 0.15f, () =>
                 {
-                    _statusEffects.TrySetStatusEffectDuration(uid, InfectionFaintStatusEffect, InfectionBriefFaintDuration);
+                    EnsureInfectionSleep(uid, infection, curTime, InfectionBriefFaintDuration);
                 });
                 break;
             case BloodstreamInfectionStage.Stage6:
                 TryProcessToxinDamage(uid, ref infection.NextToxinDamage, curTime, TimeSpan.FromSeconds(3), 10f);
                 EnsureBlindness(uid);
-                _statusEffects.TrySetStatusEffectDuration(uid, InfectionComaStatusEffect, InfectionComaRefreshDuration);
+                EnsureInfectionSleep(uid, infection, curTime, InfectionComaRefreshDuration);
                 break;
         }
+
+        ProcessInfectionSleep(uid, infection, curTime);
     }
 
     private void ProcessTreatments(EntityUid uid, BloodstreamComponent bloodstream, BloodstreamInfectionComponent infection, TimeSpan curTime)
@@ -257,11 +256,8 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         if (stage < BloodstreamInfectionStage.Stage5)
         {
             _legacyStatusEffects.TryRemoveStatusEffect(uid, TemporaryBlindnessSystem.BlindingStatusEffect);
-            _statusEffects.TryRemoveStatusEffect(uid, InfectionFaintStatusEffect);
+            StopInfectionSleep(uid, infection);
         }
-
-        if (stage < BloodstreamInfectionStage.Stage6)
-            _statusEffects.TryRemoveStatusEffect(uid, InfectionComaStatusEffect);
     }
 
     private void UpdatePain(EntityUid uid, BloodstreamInfectionStage stage)
@@ -298,6 +294,33 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
             InfectionBlindnessRefreshDuration,
             true,
             TemporaryBlindnessSystem.BlindingStatusEffect);
+    }
+
+    private void EnsureInfectionSleep(
+        EntityUid uid,
+        BloodstreamInfectionComponent infection,
+        TimeSpan curTime,
+        TimeSpan duration)
+    {
+        infection.InfectionSleepEndTime = curTime + duration;
+        _sleeping.TrySleeping(uid);
+    }
+
+    private void ProcessInfectionSleep(EntityUid uid, BloodstreamInfectionComponent infection, TimeSpan curTime)
+    {
+        if (infection.InfectionSleepEndTime == TimeSpan.Zero || curTime < infection.InfectionSleepEndTime)
+            return;
+
+        StopInfectionSleep(uid, infection);
+    }
+
+    private void StopInfectionSleep(EntityUid uid, BloodstreamInfectionComponent infection)
+    {
+        if (infection.InfectionSleepEndTime == TimeSpan.Zero)
+            return;
+
+        infection.InfectionSleepEndTime = TimeSpan.Zero;
+        _sleeping.TryWaking(uid, true);
     }
 
     private void TryProcessToxinDamage(EntityUid uid, ref TimeSpan nextAttempt, TimeSpan curTime, TimeSpan interval, float amount)
@@ -351,8 +374,7 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
 
         UpdatePain(uid, BloodstreamInfectionStage.None);
         _legacyStatusEffects.TryRemoveStatusEffect(uid, TemporaryBlindnessSystem.BlindingStatusEffect);
-        _statusEffects.TryRemoveStatusEffect(uid, InfectionFaintStatusEffect);
-        _statusEffects.TryRemoveStatusEffect(uid, InfectionComaStatusEffect);
+        StopInfectionSleep(uid, infection);
     }
 
     private void ApplyCeffenafRollback(EntityUid uid, BloodstreamInfectionComponent infection, TimeSpan curTime)
