@@ -17,7 +17,7 @@ using Robust.Shared.Timing;
 using LegacyStatusEffectsSystem = Content.Shared.StatusEffect.StatusEffectsSystem;
 using NewStatusEffectsSystem = Content.Shared.StatusEffectNew.StatusEffectsSystem;
 
-namespace Content.Server._Chaos;
+namespace Content.Server._Chaos.Bloodstream;
 
 public sealed class BloodstreamInfectionSystem : EntitySystem
 {
