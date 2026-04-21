@@ -94,7 +94,9 @@ using Content.Shared._Shitmed.Medical.Surgery.Consciousness;
 using Content.Shared._Shitmed.Medical.Surgery.Consciousness.Systems;
 using Content.Shared._Shitmed.Targeting;
 using Content.Server.EntityEffects;
-using Content.Shared._Orion.Mobs.Critical;
+// Chaos-Station-start
+// using Content.Shared._Orion.Mobs.Critical;
+// Chaos-Station-end
 using Content.Shared.EntityEffects.EffectConditions;
 using Content.Shared.EntityEffects.Effects;
 using Content.Shared.Chemistry.EntitySystems;
@@ -112,7 +114,9 @@ using Content.Shared.Database;
 using Content.Shared.Mobs.Systems;
 using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Random;
+// Chaos-Station-start
+// using Robust.Shared.Random;
+// Chaos-Station-end
 using Robust.Shared.Timing;
 
 namespace Content.Server.Body.Systems;
@@ -133,7 +137,9 @@ public sealed class RespiratorSystem : EntitySystem
     [Dependency] private readonly ChatSystem _chat = default!;
     [Dependency] private readonly EntityEffectSystem _entityEffect = default!;
     [Dependency] private readonly ConsciousnessSystem _consciousness = default!; // Shitmed Change
-    [Dependency] private readonly IRobustRandom _random = default!; // Orion
+    // Chaos-Station-start
+    // [Dependency] private readonly IRobustRandom _random = default!; // Orion
+    // Chaos-Station-end
 
     private static readonly ProtoId<MetabolismGroupPrototype> GasId = new("Gas");
 
@@ -203,32 +209,35 @@ public sealed class RespiratorSystem : EntitySystem
             // End DeltaV Code
             UpdateSaturation(uid,  multiplier * (float) respirator.UpdateInterval.TotalSeconds, respirator); // DeltaV: use multiplier instead of negating
 
-            // Orion-Start
-            var critComponent = CompOrNull<CritStateMovementComponent>(uid);
-            var canBreatheActively = !HasComp<DebrainedComponent>(uid) && (!_mobState.IsIncapacitated(uid) || _mobState.IsSoftCritical(uid));
-            // Orion-End
+            // Chaos-Station-start
+            // var critComponent = CompOrNull<CritStateMovementComponent>(uid);
+            // var canBreatheActively = !HasComp<DebrainedComponent>(uid) && (!_mobState.IsIncapacitated(uid) || _mobState.IsSoftCritical(uid));
+            var canBreatheActively = !HasComp<DebrainedComponent>(uid) && (!_mobState.IsIncapacitated(uid) || _mobState.IsCritical(uid));
+            // Chaos-Station-end
 
             if (canBreatheActively) // Orion-Edit
             {
-                // Orion-Start
-                var canCycleBreath = !_mobState.IsSoftCritical(uid) || critComponent == null || _random.Prob(critComponent.SoftCritBreathChance);
-                if (canCycleBreath)
-                // Orion-End
+                // Chaos-Station-start
+                // var canCycleBreath = !_mobState.IsSoftCritical(uid) || critComponent == null || _random.Prob(critComponent.SoftCritBreathChance);
+                // if (canCycleBreath)
+                // {
+                // Chaos-Station-end
+                // Orion-Edit-Start
+                switch (respirator.Status)
                 {
-                    // Orion-Edit-Start
-                    switch (respirator.Status)
-                    {
-                        case RespiratorStatus.Inhaling:
-                            Inhale((uid, respirator));
-                            respirator.Status = RespiratorStatus.Exhaling;
-                            break;
-                        case RespiratorStatus.Exhaling:
-                            Exhale((uid, respirator));
-                            respirator.Status = RespiratorStatus.Inhaling;
-                            break;
-                    }
-                    // Orion-Edit-End
+                    case RespiratorStatus.Inhaling:
+                        Inhale((uid, respirator));
+                        respirator.Status = RespiratorStatus.Exhaling;
+                        break;
+                    case RespiratorStatus.Exhaling:
+                        Exhale((uid, respirator));
+                        respirator.Status = RespiratorStatus.Inhaling;
+                        break;
                 }
+                // Orion-Edit-End
+                // Chaos-Station-start
+                // }
+                // Chaos-Station-end
             }
 
             if (!CanBreathe(uid, respirator)) // Goobstation edit
@@ -598,17 +607,20 @@ public sealed class RespiratorSystem : EntitySystem
 
     private DamageSpecifier CalculateSuffocationRecovery(EntityUid ent, RespiratorComponent respirator)
     {
-        var recovery = respirator.DamageRecovery;
-
-        if (!TryComp<CritStateMovementComponent>(ent, out var critConfig))
-            return recovery;
-
-        if (_mobState.IsSoftCritical(ent))
-            recovery *= critConfig.SoftCritSuffocationRecoveryMultiplier;
-        else if (_mobState.IsHardCritical(ent))
-            recovery *= critConfig.HardCritSuffocationRecoveryMultiplier;
-
-        return recovery;
+        // Chaos-Station-start
+        // var recovery = respirator.DamageRecovery;
+        //
+        // if (!TryComp<CritStateMovementComponent>(ent, out var critConfig))
+        //     return recovery;
+        //
+        // if (_mobState.IsSoftCritical(ent))
+        //     recovery *= critConfig.SoftCritSuffocationRecoveryMultiplier;
+        // else if (_mobState.IsHardCritical(ent))
+        //     recovery *= critConfig.HardCritSuffocationRecoveryMultiplier;
+        //
+        // return recovery;
+        return respirator.DamageRecovery;
+        // Chaos-Station-end
     }
 
     public void UpdateSaturation(EntityUid uid, float amount, RespiratorComponent? respirator = null)
