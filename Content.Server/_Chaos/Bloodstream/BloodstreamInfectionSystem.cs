@@ -96,21 +96,27 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         if (bloodstream.BleedAmountFromWounds <= 0)
         {
             infection.NextInfectionAttempt = TimeSpan.Zero;
+            infection.HighestRolledInfectionTier = 0;
             return;
         }
 
         var bloodPercentage = _bloodstream.GetBloodLevelPercentage((uid, bloodstream));
-        var chance = GetInfectionChance(bloodPercentage);
-        if (chance <= 0f)
+        var tier = GetInfectionTier(bloodPercentage);
+        if (tier <= 0)
         {
             infection.NextInfectionAttempt = TimeSpan.Zero;
             return;
         }
 
+        if (tier <= infection.HighestRolledInfectionTier)
+            return;
+
         if (infection.NextInfectionAttempt != TimeSpan.Zero && curTime < infection.NextInfectionAttempt)
             return;
 
         infection.NextInfectionAttempt = curTime + InfectionAttemptInterval;
+        infection.HighestRolledInfectionTier = tier;
+        var chance = GetInfectionChance(tier);
         TryStartInfection(uid, infection, curTime, chance, bloodPercentage);
     }
 
@@ -119,12 +125,11 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         if (!_random.Prob(chance))
             return false;
 
-        var initialElapsed = GetInitialInfectionElapsed(bloodPercentage);
         infection.Infected = true;
         DirtyField(uid, infection, nameof(BloodstreamInfectionComponent.Infected));
-        infection.InfectionStartTime = curTime - initialElapsed;
+        infection.InfectionStartTime = curTime;
         infection.NextInfectionAttempt = TimeSpan.Zero;
-        SetCurrentStage(uid, infection, GetInfectionStage(initialElapsed));
+        SetCurrentStage(uid, infection, BloodstreamInfectionStage.Stage1);
         return true;
     }
 
@@ -140,6 +145,7 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         DirtyField(uid, infection, nameof(BloodstreamInfectionComponent.Infected));
         infection.InfectionStartTime = _timing.CurTime - elapsed;
         infection.NextInfectionAttempt = TimeSpan.Zero;
+        infection.HighestRolledInfectionTier = 0;
         infection.NextToxinDamage = TimeSpan.Zero;
         infection.NextFaintAttempt = TimeSpan.Zero;
         infection.PendingCeffenafRollbackTime = TimeSpan.Zero;
@@ -335,6 +341,7 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         DirtyField(uid, infection, nameof(BloodstreamInfectionComponent.Infected));
         infection.InfectionStartTime = TimeSpan.Zero;
         infection.NextInfectionAttempt = TimeSpan.Zero;
+        infection.HighestRolledInfectionTier = 0;
         infection.NextToxinDamage = TimeSpan.Zero;
         infection.NextFaintAttempt = TimeSpan.Zero;
         infection.PendingCeffenafRollbackTime = TimeSpan.Zero;
@@ -376,18 +383,29 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
         return (BloodstreamInfectionStage) (currentStage - 1);
     }
 
-    private static float GetInfectionChance(float bloodPercentage)
+    private static int GetInfectionTier(float bloodPercentage)
     {
         if (bloodPercentage <= 0.30f)
-            return 0.45f;
+            return 3;
 
         if (bloodPercentage <= 0.50f)
-            return 0.35f;
+            return 2;
 
         if (bloodPercentage <= 0.70f)
-            return 0.15f;
+            return 1;
 
-        return 0f;
+        return 0;
+    }
+
+    private static float GetInfectionChance(int tier)
+    {
+        return tier switch
+        {
+            3 => 0.45f,
+            2 => 0.35f,
+            1 => 0.15f,
+            _ => 0f,
+        };
     }
 
     public static BloodstreamInfectionStage GetInfectionStage(TimeSpan infectionDuration)
@@ -408,20 +426,6 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
             return BloodstreamInfectionStage.Stage5;
 
         return BloodstreamInfectionStage.Stage6;
-    }
-
-    private static TimeSpan GetInitialInfectionElapsed(float bloodPercentage)
-    {
-        if (bloodPercentage <= 0.30f)
-            return InfectionStage4Start;
-
-        if (bloodPercentage <= 0.50f)
-            return InfectionStage3Start;
-
-        if (bloodPercentage <= 0.70f)
-            return InfectionStage2Start;
-
-        return TimeSpan.Zero;
     }
 
     private static TimeSpan GetInfectionStageStart(BloodstreamInfectionStage stage)
