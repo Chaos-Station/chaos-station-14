@@ -13,7 +13,7 @@
     solutionName: pen
     maxFillLevels: 1
     changeColor: false
-    emptySpriteName: medipen_empty
+    emptySpriteName: orangepen_open
   - type: SolutionContainerManager
     solutions:
       pen:
