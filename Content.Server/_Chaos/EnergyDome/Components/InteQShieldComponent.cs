@@ -58,7 +58,7 @@ public sealed partial class InteQShieldComponent : Component
     /// время, когда закончится действие ЭМИ
     /// </summary>
     [DataField]
-    public TimeSpan? EmpEndTime;
+    public TimeSpan EmpEndTime = TimeSpan.FromSeconds(120);
 
     /// <summary>
     /// находится ли щит под действием ЭМИ

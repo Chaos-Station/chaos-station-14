@@ -137,7 +137,7 @@ public sealed class EnergyDomeSystem : EntitySystem
             args.PushMarkup(Loc.GetString("inteq-shield-health", ("current", shieldComp.CurrentHealth), ("max", shieldComp.MaxHealth)));
             if (shieldComp.OnCooldown)
             {
-                var remaining = (shieldComp.CooldownEndTime.Value - _timing.CurTime).TotalSeconds;
+                var remaining = (shieldComp.CooldownEndTime - _timing.CurTime).TotalSeconds;
                 if (remaining < 0 || remaining == null)
                 {
                     remaining = 0;
@@ -146,7 +146,7 @@ public sealed class EnergyDomeSystem : EntitySystem
             }
             if (shieldComp.EmpDisabled)
             {
-                var remaining = (shieldComp.EmpEndTime.Value - _timing.CurTime).TotalSeconds;
+                var remaining = (shieldComp.EmpEndTime - _timing.CurTime).TotalSeconds;
                 if (remaining < 0 || remaining == null)
                 {
                     remaining = 0;
@@ -471,7 +471,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         // проверяем активность эмп эффекта
         if (shield.EmpDisabled && shield.EmpEndTime <= currentTime)
         {
-            shield.EmpEndTime = null;
+            shield.EmpEndTime = TimeSpan.FromSeconds(0);
         }
 
         if (shield.EmpDisabled)
@@ -480,7 +480,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         // проверяем активность кд и сбрасываем если истёк
         if (shield.OnCooldown && shield.CooldownEndTime <= currentTime)
         {
-            shield.CooldownEndTime = 0;
+            shield.CooldownEndTime = TimeSpan.FromSeconds(0);
         }
 
         // проверяем заряд батареи
@@ -494,7 +494,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         }
 
         // проверяем активность кд
-        if (shield.LastDamageTime.HasValue && _timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
+        if (shield.LastDamageTime.Value && _timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
         {
             // реген прочности щита
             var regenAmount = shield.RegenRate * frameTime;
