@@ -5,9 +5,9 @@
   description: just empty medipen
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
+    sprite: _Chaos/medipen.rsi
     layers:
-    - state: medipen
+    - state: orangepen_closed
       map: ["enum.SolutionContainerLayers.Fill"]
   - type: SolutionContainerVisuals
     solutionName: pen
