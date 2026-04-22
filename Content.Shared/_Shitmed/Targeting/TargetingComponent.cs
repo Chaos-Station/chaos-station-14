@@ -30,7 +30,7 @@ public sealed partial class TargetingComponent : Component
             TargetBodyPart.Head, new Dictionary<TargetBodyPart, float>
             {
                 { TargetBodyPart.Head, 1f }, // Chaos-Station-Tweak
-                //{ TargetBodyPart.Head, 0.5f },
+                { TargetBodyPart.Head, 0.5f },
                 //{ TargetBodyPart.Chest, 0.5f },
             }
         },
