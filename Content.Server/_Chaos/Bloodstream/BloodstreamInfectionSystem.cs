@@ -31,11 +31,11 @@ public sealed class BloodstreamInfectionSystem : EntitySystem
     private static readonly TimeSpan InfectionAttemptInterval = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan CeffenafRollbackDelay = TimeSpan.FromSeconds(60);
 
-    private static readonly TimeSpan InfectionStage2Start = TimeSpan.FromSeconds(45);
-    private static readonly TimeSpan InfectionStage3Start = TimeSpan.FromSeconds(90);
-    private static readonly TimeSpan InfectionStage4Start = TimeSpan.FromSeconds(140);
-    private static readonly TimeSpan InfectionStage5Start = TimeSpan.FromSeconds(200);
-    private static readonly TimeSpan InfectionStage6Start = TimeSpan.FromSeconds(270);
+    private static readonly TimeSpan InfectionStage2Start = TimeSpan.FromSeconds(400);
+    private static readonly TimeSpan InfectionStage3Start = TimeSpan.FromSeconds(700);
+    private static readonly TimeSpan InfectionStage4Start = TimeSpan.FromSeconds(1000);
+    private static readonly TimeSpan InfectionStage5Start = TimeSpan.FromSeconds(1300);
+    private static readonly TimeSpan InfectionStage6Start = TimeSpan.FromSeconds(1600);
     private static readonly TimeSpan InfectionBlindnessRefreshDuration = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan InfectionComaRefreshDuration = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan InfectionBriefFaintDuration = TimeSpan.FromSeconds(5);
