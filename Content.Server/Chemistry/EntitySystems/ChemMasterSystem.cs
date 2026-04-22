@@ -157,7 +157,12 @@ namespace Content.Server.Chemistry.EntitySystems
             switch (chemMaster.Comp.Mode)
             {
                 case ChemMasterMode.Transfer:
-                    TransferReagents(chemMaster, message.ReagentId, message.Amount.GetFixedPoint(), false, message.Actor); // goob - logging. CS-Tweak: message.FromBuffer -> false
+                // CS-Tweak start
+                    if (message.Target == ChemMasterTarget.Buffer)
+                        TransferReagents(chemMaster, message.ReagentId, message.Amount.GetFixedPoint(), true, message.Actor);
+                    else
+                        TransferReagents(chemMaster, message.ReagentId, message.Amount.GetFixedPoint(), false, message.Actor);
+                // CS-Tweak end
                     break;
                 case ChemMasterMode.Discard:
                     DiscardReagents(chemMaster, message.ReagentId, message.Amount.GetFixedPoint(), false); // CS-Tweak: message.FromBuffer -> false
@@ -166,8 +171,10 @@ namespace Content.Server.Chemistry.EntitySystems
                 case ChemMasterMode.Fill:
                     if (message.Target == ChemMasterTarget.Medipen)
                         TransferToMedipen(chemMaster, message.ReagentId, message.Amount.GetFixedPoint(), message.Actor);
-                // CS-Tweak end
+                    else if (message.Target == ChemMasterTarget.Container)
+                        TransferReagents(chemMaster, message.ReagentId, message.Amount.GetFixedPoint(), false, message.Actor, SharedChemMaster.OutputSlotName);
                     break;
+                // CS-Tweak end
                 default:
                     // Invalid mode.
                     return;
@@ -176,9 +183,9 @@ namespace Content.Server.Chemistry.EntitySystems
             ClickSound(chemMaster);
         }
 
-        private void TransferReagents(Entity<ChemMasterComponent> chemMaster, ReagentId id, FixedPoint2 amount, bool fromBuffer, EntityUid? actor = null) // goob - logging
+        private void TransferReagents(Entity<ChemMasterComponent> chemMaster, ReagentId id, FixedPoint2 amount, bool fromBuffer, EntityUid? actor = null, string containerSlot = SharedChemMaster.InputSlotName) // goob - logging. // CS-Tweak
         {
-            var container = _itemSlotsSystem.GetItemOrNull(chemMaster, SharedChemMaster.InputSlotName);
+            var container = _itemSlotsSystem.GetItemOrNull(chemMaster, containerSlot); // CS-Tweak
             if (container is null ||
                 !_solutionContainerSystem.TryGetFitsInDispenser(container.Value, out var containerSoln, out var containerSolution) ||
                 !_solutionContainerSystem.TryGetSolution(chemMaster.Owner, SharedChemMaster.BufferSolutionName, out var bufferSoln, out var bufferSolution)) // CS-Tweak
@@ -245,6 +252,12 @@ namespace Content.Server.Chemistry.EntitySystems
             {
                 return;
             }
+
+            // CS-Tweak start
+            amount = FixedPoint2.Min(amount, medipenSolution.AvailableVolume);
+            if (amount <= 0)
+                return;
+            // CS-Tweak end
 
             var removedAmount = bufferSolution.RemoveReagent(id, amount, preserveOrder: true);
             if (removedAmount > 0)
@@ -446,6 +459,13 @@ namespace Content.Server.Chemistry.EntitySystems
                 {
                     return BuildContainerInfo(name, solution);
                 }
+                // CS-Tweak start
+                else if (_solutionContainerSystem.TryGetSolution(
+                        container.Value, "pen", out _, out var penSolution))
+                {
+                    return BuildContainerInfo(name, penSolution);
+                }
+                // CS-Tweak end
             }
 
             if (!TryComp(container, out StorageComponent? storage))
