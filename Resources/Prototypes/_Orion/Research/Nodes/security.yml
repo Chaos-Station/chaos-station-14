@@ -406,4 +406,5 @@
   - PortableMicrofusionWeaponry
   recipeUnlocks:
   - EnergyDomeTurtle
+  - CSInteQShieldBelt # CS-Tweak
   position: 3,0
