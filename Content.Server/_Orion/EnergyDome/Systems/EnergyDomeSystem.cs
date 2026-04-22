@@ -3,6 +3,9 @@ using Content.Server.DeviceLinking.Systems;
 using Content.Server.Power.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.PowerCell;
+using Content.Server.Emp;
+using Content.Server._Chaos.EnergyDome.Components;
+using Content.Goobstation.Maths.FixedPoint;
 using Content.Shared.Actions;
 using Content.Shared.Damage;
 using Content.Shared.DeviceLinking.Events;
@@ -16,7 +19,10 @@ using Content.Shared.Toggleable;
 using Content.Shared.Verbs;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
-
+using Robust.Shared.Timing;
+using Robust.Server.GameObjects;
+using Robust.Shared.Prototypes;
+using Content.Server.Damage.Systems;
 namespace Content.Server._Orion.EnergyDome.Systems;
 
 //
@@ -33,6 +39,9 @@ public sealed class EnergyDomeSystem : EntitySystem
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly PowerCellSystem _powerCell = default!;
     [Dependency] private readonly DeviceLinkSystem _signalSystem = default!;
+    [Dependency] private readonly IGameTiming _timing = default!; // CS-Tweak
+    [Dependency] private readonly IPrototypeManager _prototypeManager = default!; // CS-Tweak
+    [Dependency] private readonly DamageableSystem _damageable = default!; // CS-Tweak
 
     public override void Initialize()
     {
@@ -58,7 +67,22 @@ public sealed class EnergyDomeSystem : EntitySystem
         SubscribeLocalEvent<EnergyDomeGeneratorComponent, ComponentRemove>(OnComponentRemove);
 
         SubscribeLocalEvent<EnergyDomeComponent, DamageChangedEvent>(OnDomeDamaged);
+
+        SubscribeLocalEvent<InteQShieldComponent, EmpPulseEvent>(OnEmpPulse); // CS-Tweak
     }
+
+    // CS-Tweak start
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        var query = EntityQueryEnumerator<InteQShieldComponent>();
+        while (query.MoveNext(out var uid, out var shield))
+        {
+            UpdateShieldRegeneration(uid, shield, frameTime);
+        }
+    }
+    // CS-Tweak end
 
     private void OnInit(Entity<EnergyDomeGeneratorComponent> generator, ref MapInitEvent args)
     {
@@ -106,6 +130,23 @@ public sealed class EnergyDomeSystem : EntitySystem
             ? "energy-dome-on-examine-is-on-message"
             : "energy-dome-on-examine-is-off-message"
             ));
+        
+        // CS-Tweak start
+        if (TryComp<InteQShieldComponent>(generator, out var shieldComp))
+        {
+            args.PushMarkup(Loc.GetString("inteq-shield-health", ("current", shieldComp.CurrentHealth), ("max", shieldComp.MaxHealth)));
+            if (shieldComp.OnCooldown)
+            {
+                var remaining = (shieldComp.CooldownEndTime.Value - _timing.CurTime).TotalSeconds;
+                args.PushMarkup(Loc.GetString("inteq-shield-cooldown", ("time", (int)Math.Max(0, remaining))));
+            }
+            if (shieldComp.EmpDisabled)
+            {
+                var remaining = (shieldComp.EmpEndTime.Value - _timing.CurTime).TotalSeconds;
+                args.PushMarkup(Loc.GetString("inteq-shield-emp-active", ("time", (int)Math.Max(0, remaining))));
+            }
+        }
+        // CS-Tweak end
     }
 
     private void AddToggleDomeVerb(Entity<EnergyDomeGeneratorComponent> generator, ref GetVerbsEvent<ActivationVerb> args)
@@ -171,29 +212,66 @@ public sealed class EnergyDomeSystem : EntitySystem
             return;
 
         var totalDamage = args.DamageDelta.GetTotal().Float();
-        var energyLeak = totalDamage * generatorComp.DamageEnergyDraw;
 
-        _audio.PlayPvs(generatorComp.ParrySound, dome);
-
-        if (HasComp<PowerCellDrawComponent>(generatorUid))
+        // CS-Tweak start
+        if (TryComp<InteQShieldComponent>(generatorUid, out var shieldComp))
         {
-            if (_powerCell.TryGetBatteryFromSlot(generatorUid, out var cell))
+            var shieldDamage = new DamageSpecifier();
+            foreach (var (damageType, amount) in args.DamageDelta.DamageDict)
             {
-                _battery.UseCharge(generatorUid, energyLeak, cell);
+                if (damageType == shieldComp.MultiplyDamage)
+                {
+                    shieldDamage.DamageDict[damageType] = amount * 3; // умножаем определенный тип на 3
+                }
+                else
+                {
+                    shieldDamage.DamageDict[damageType] = amount; // пропорциональный урон для всего другого
+                }
+            }
 
-                if (cell.CurrentCharge == 0)
-                    TurnOff((generatorUid, generatorComp), true);
+            _damageable.TryChangeDamage(generatorUid, shieldDamage);
+
+            totalDamage = shieldDamage.GetTotal().Float();
+
+            shieldComp.CurrentHealth -= (int)totalDamage;
+            shieldComp.LastDamageTime = _timing.CurTime; // записываем момент последнего попадания, для некст логики у КД
+            _audio.PlayPvs(generatorComp.ParrySound, dome);
+
+            // выключаем щит и запускаем кд, если здоровье щита упало до нуля
+            if (shieldComp.CurrentHealth <= 0)
+            {
+                shieldComp.CurrentHealth = 0;
+                TurnOff((generatorUid, generatorComp), true);
+                shieldComp.CooldownEndTime = _timing.CurTime + TimeSpan.FromSeconds(shieldComp.CooldownTime);
             }
         }
+        else
+        {
+            // CS-Tweak end
+            var energyLeak = totalDamage * generatorComp.DamageEnergyDraw;
 
-        // It seems to me it would not work well to hang both a powercell and an internal battery with wire charging on the object....
-        if (!TryComp<BatteryComponent>(generatorUid, out var battery))
-            return;
+            _audio.PlayPvs(generatorComp.ParrySound, dome);
 
-        _battery.UseCharge(generatorUid, energyLeak, battery);
+            if (HasComp<PowerCellDrawComponent>(generatorUid))
+            {
+                if (_powerCell.TryGetBatteryFromSlot(generatorUid, out var cell))
+                {
+                    _battery.UseCharge(generatorUid, energyLeak, cell);
 
-        if (battery.CurrentCharge == 0)
-            TurnOff((generatorUid, generatorComp), true);
+                    if (cell.CurrentCharge == 0)
+                        TurnOff((generatorUid, generatorComp), true);
+                }
+            }
+
+            // It seems to me it would not work well to hang both a powercell and an internal battery with wire charging on the object....
+            if (!TryComp<BatteryComponent>(generatorUid, out var battery))
+                return;
+
+            _battery.UseCharge(generatorUid, energyLeak, battery);
+
+            if (battery.CurrentCharge == 0)
+                TurnOff((generatorUid, generatorComp), true);
+        }
     }
 
     private void OnParentChanged(Entity<EnergyDomeGeneratorComponent> generator, ref EntParentChangedMessage args)
@@ -223,6 +301,32 @@ public sealed class EnergyDomeSystem : EntitySystem
                     generator);
             return false;
         }
+
+        // CS-Tweak start. Парочка проверок на наличие компонента и стейты его переменных
+        if (TryComp<InteQShieldComponent>(generator, out var shieldComp))
+        {
+            if (shieldComp.EmpDisabled)
+            {
+                _audio.PlayPvs(generator.Comp.AccessDeniedSound, generator);
+                _popup.PopupEntity(Loc.GetString("inteq-shield-emp-disabled"), generator);
+                return false;
+            }
+
+            if (shieldComp.OnCooldown)
+            {
+                _audio.PlayPvs(generator.Comp.AccessDeniedSound, generator);
+                _popup.PopupEntity(Loc.GetString("inteq-shield-on-cooldown"), generator);
+                return false;
+            }
+
+            if (status && shieldComp.CurrentHealth < shieldComp.MinHealthToActivate)
+            {
+                _audio.PlayPvs(generator.Comp.AccessDeniedSound, generator);
+                _popup.PopupEntity(Loc.GetString("inteq-shield-insufficient-health"), generator);
+                return false;
+            }
+        }
+        // CS-Tweak end
 
         if (TryComp<PowerCellSlotComponent>(generator, out _))
         {
@@ -329,6 +433,86 @@ public sealed class EnergyDomeSystem : EntitySystem
             _useDelay.TryResetDelay(new Entity<UseDelayComponent>(generator, useDelay));
         }
     }
+
+    #endregion // CS-Tweak. забыли видимо добавить
+
+    #region CS-Tweak пояс-щит
+
+    private void OnEmpPulse(Entity<InteQShieldComponent> shield, ref EmpPulseEvent args)
+    {
+        // записываем время, когда закончится действие ЭМП, чтобы на это время отключить щит и не позволить его включить
+        shield.Comp.EmpEndTime = _timing.CurTime + TimeSpan.FromSeconds(shield.Comp.EmpDisableTime);
+
+        // эмп выключает щит на время
+        if (TryComp<EnergyDomeGeneratorComponent>(shield, out var generatorComp) && generatorComp.Enabled)
+        {
+            TurnOff((shield.Owner, generatorComp), true);
+        }
+
+        // разряд батареи в нулину при эмп
+        if (_powerCell.TryGetBatteryFromSlot(shield.Owner, out var cell))
+        {
+            _battery.SetCharge(cell.Owner, 0, cell);
+        }
+    }
+
+    private void UpdateShieldRegeneration(EntityUid uid, InteQShieldComponent shield, float frameTime)
+    {
+        var currentTime = _timing.CurTime;
+
+        // проверяем активность эмп эффекта
+        if (shield.EmpDisabled && shield.EmpEndTime <= currentTime)
+        {
+            shield.EmpEndTime = null;
+        }
+
+        if (shield.EmpDisabled)
+            return;
+
+        // проверяем активность кд и сбрасываем если истёк
+        if (shield.OnCooldown && shield.CooldownEndTime <= currentTime)
+        {
+            shield.CooldownEndTime = null;
+        }
+
+        // проверяем заряд батареи
+        if (_powerCell.TryGetBatteryFromSlot(uid, out var cell) && cell.CurrentCharge <= 0)
+        {
+            if (TryComp<EnergyDomeGeneratorComponent>(uid, out var generatorComp) && generatorComp.Enabled)
+            {
+                TurnOff((uid, generatorComp), true);
+            }
+            return;
+        }
+
+        // проверяем активность кд
+        if (shield.LastDamageTime.HasValue && _timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
+        {
+            // реген прочности щита
+            var regenAmount = shield.RegenRate * frameTime;
+            shield.AccumulatedRegen += regenAmount;
+
+            int healthGained = 0;
+            while (shield.AccumulatedRegen >= 1f && shield.CurrentHealth < shield.MaxHealth && cell != null && cell.CurrentCharge >= shield.RegenEnergyCost)
+            {
+                shield.CurrentHealth += 1;
+                shield.AccumulatedRegen -= 1f;
+                healthGained += 1;
+            }
+
+            var energyCost = (float)shield.RegenEnergyCost * healthGained;
+            if (cell != null && energyCost > 0)
+            {
+                _battery.UseCharge(cell.Owner, energyCost, cell);
+            }
+
+            if (shield.CurrentHealth >= shield.MaxHealth)
+            {
+                shield.LastDamageTime = null; // сбрасываем время последнего повреждения, когда щит полностью восстановлен
+            }
+        }
+    }
+    // CS-Tweak end
 
     #endregion
 
