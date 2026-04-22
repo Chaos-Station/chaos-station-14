@@ -40,7 +40,7 @@ public sealed partial class InteQShieldComponent : Component
     /// время, когда щит можно будет активировать снова
     /// </summary>
     [DataField]
-    public TimeSpan? CooldownEndTime;
+    public TimeSpan? CooldownEndTime = TimeSpan.FromSeconds(30);
 
     /// <summary>
     /// находится ли щит на кд
