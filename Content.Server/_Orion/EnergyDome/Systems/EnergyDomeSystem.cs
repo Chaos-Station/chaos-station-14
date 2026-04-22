@@ -496,11 +496,8 @@ public sealed class EnergyDomeSystem : EntitySystem
         }
 
         // проверяем активность кд
-        if (_timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
+        if (shield.LastDamageTime.HasValue && _timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
         {
-            if (shield.LastDamageTime.Value is null)
-                return;
-
             // реген прочности щита
             var regenAmount = shield.RegenRate * frameTime;
             shield.AccumulatedRegen += regenAmount;
