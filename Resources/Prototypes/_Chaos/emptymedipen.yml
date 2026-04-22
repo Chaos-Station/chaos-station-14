@@ -5,15 +5,15 @@
   description: just empty medipen
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
+    sprite: _Chaos/medipen.rsi
     layers:
-    - state: medipen
+    - state: orangepen_closed
       map: ["enum.SolutionContainerLayers.Fill"]
   - type: SolutionContainerVisuals
     solutionName: pen
     maxFillLevels: 1
     changeColor: false
-    emptySpriteName: medipen_empty
+    emptySpriteName: orangepen_open
   - type: SolutionContainerManager
     solutions:
       pen:
