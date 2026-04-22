@@ -138,11 +138,19 @@ public sealed class EnergyDomeSystem : EntitySystem
             if (shieldComp.OnCooldown)
             {
                 var remaining = (shieldComp.CooldownEndTime.Value - _timing.CurTime).TotalSeconds;
+                if (remaining < 0 || remaining == null)
+                {
+                    remaining = 0;
+                }
                 args.PushMarkup(Loc.GetString("inteq-shield-cooldown", ("time", (int)Math.Max(0, remaining))));
             }
             if (shieldComp.EmpDisabled)
             {
                 var remaining = (shieldComp.EmpEndTime.Value - _timing.CurTime).TotalSeconds;
+                if (remaining < 0 || remaining == null)
+                {
+                    remaining = 0;
+                }
                 args.PushMarkup(Loc.GetString("inteq-shield-emp-active", ("time", (int)Math.Max(0, remaining))));
             }
         }
@@ -472,7 +480,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         // проверяем активность кд и сбрасываем если истёк
         if (shield.OnCooldown && shield.CooldownEndTime <= currentTime)
         {
-            shield.CooldownEndTime = null;
+            shield.CooldownEndTime = 0;
         }
 
         // проверяем заряд батареи
