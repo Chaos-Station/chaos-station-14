@@ -474,6 +474,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         if (shield.EmpDisabled && shield.EmpEndTime <= currentTime)
         {
             shield.EmpEndTime = TimeSpan.FromSeconds(0);
+            shield.EmpDisabled = !shield.EmpDisabled;
         }
 
         if (shield.EmpDisabled)
@@ -483,6 +484,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         if (shield.OnCooldown && shield.CooldownEndTime <= currentTime)
         {
             shield.CooldownEndTime = TimeSpan.FromSeconds(0);
+            shield.OnCooldown = !shield.OnCooldown;
         }
 
         // проверяем заряд батареи
