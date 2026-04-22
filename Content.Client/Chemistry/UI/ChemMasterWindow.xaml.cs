@@ -240,6 +240,8 @@ namespace Content.Client.Chemistry.UI
                 ChemMasterSortingType.Latest => Loc.GetString("chem-master-window-sort-type-latest"),
                 _ => Loc.GetString("chem-master-window-sort-type-none")
             };
+
+
             if (!state.BufferReagents.Any())
             {
                 BufferInfo.Children.Add(new Label { Text = Loc.GetString("chem-master-window-buffer-empty-text") });
@@ -250,11 +252,13 @@ namespace Content.Client.Chemistry.UI
 
                 return;
             }
+
             var bufferHBox = new BoxContainer
             {
                 Orientation = LayoutOrientation.Horizontal
             };
             BufferInfo.AddChild(bufferHBox);
+
             var bufferLabel = new Label { Text = $"{Loc.GetString("chem-master-window-buffer-label")} " };
             bufferHBox.AddChild(bufferLabel);
             var bufferVol = new Label
@@ -263,6 +267,7 @@ namespace Content.Client.Chemistry.UI
                 StyleClasses = { StyleNano.StyleClassLabelSecondaryColor }
             };
             bufferHBox.AddChild(bufferVol);
+
             // This sets up the needed data for sorting later in a list
             // Its done this way to not repeat having to use same code twice (once for sorting
             // and once for displaying)
@@ -275,6 +280,7 @@ namespace Content.Client.Chemistry.UI
                 var reagentColor = proto?.SubstanceColor ?? default(Color);
                 reagentList.Add(new (reagentId, name, reagentColor, quantity));
             }
+
             // We sort here since we need sorted list to be filled first.
             // You can easily add any new params you need to it.
             switch (state.SortingType)
@@ -282,6 +288,7 @@ namespace Content.Client.Chemistry.UI
                 case ChemMasterSortingType.Alphabetical:
                     reagentList = reagentList.OrderBy(x => x.name).ToList();
                     break;
+
                 case ChemMasterSortingType.Quantity:
                     reagentList = reagentList.OrderByDescending(x => x.quantity).ToList();
                     break;
