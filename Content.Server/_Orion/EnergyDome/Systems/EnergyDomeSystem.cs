@@ -251,6 +251,7 @@ public sealed class EnergyDomeSystem : EntitySystem
                 shieldComp.CurrentHealth = 0;
                 TurnOff((generatorUid, generatorComp), true);
                 shieldComp.CooldownEndTime = _timing.CurTime + TimeSpan.FromSeconds(shieldComp.CooldownTime);
+                shieldComp.OnCooldown = !shieldComp.OnCooldown;
             }
         }
         else
@@ -450,6 +451,7 @@ public sealed class EnergyDomeSystem : EntitySystem
     {
         // записываем время, когда закончится действие ЭМП, чтобы на это время отключить щит и не позволить его включить
         shield.Comp.EmpEndTime = _timing.CurTime + TimeSpan.FromSeconds(shield.Comp.EmpDisableTime);
+        shield.Comp.EmpDisabled = !shield.Comp.EmpDisabled;
 
         // эмп выключает щит на время
         if (TryComp<EnergyDomeGeneratorComponent>(shield, out var generatorComp) && generatorComp.Enabled)
@@ -494,7 +496,7 @@ public sealed class EnergyDomeSystem : EntitySystem
         }
 
         // проверяем активность кд
-        if (shield.LastDamageTime.Value && _timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
+        if (_timing.CurTime >= shield.LastDamageTime.Value + TimeSpan.FromSeconds(shield.CooldownTime))
         {
             // реген прочности щита
             var regenAmount = shield.RegenRate * frameTime;

@@ -46,7 +46,7 @@ public sealed partial class InteQShieldComponent : Component
     /// находится ли щит на кд
     /// </summary>
     [ViewVariables(VVAccess.ReadOnly)]
-    public bool OnCooldown => CooldownEndTime.HasValue;
+    public bool OnCooldown = false;
 
     /// <summary>
     /// время отключения щита от любого ЭМИ
@@ -64,7 +64,7 @@ public sealed partial class InteQShieldComponent : Component
     /// находится ли щит под действием ЭМИ
     /// </summary>
     [ViewVariables(VVAccess.ReadOnly)]
-    public bool EmpDisabled => EmpEndTime.HasValue;
+    public bool EmpDisabled = false;
 
     /// <summary>
     /// энергия, требуемая для восстановления 1 единицы здоровья щита
