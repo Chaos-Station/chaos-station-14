@@ -12,6 +12,7 @@
   id: StatusEffectBloodlossCriticalSleep
   name: critical bloodloss
   components:
+  - type: Sleeping
   - type: ForcedSleepingStatusEffect
   - type: StunnedStatusEffect
   - type: KnockdownStatusEffect
