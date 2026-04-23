@@ -31,7 +31,7 @@ public sealed partial class MobThresholdSystem
 
         var criticalParts = new[]
         {
-            // BodyPartType.Head, // Chaos-Station-Tweak
+            BodyPartType.Head,
             BodyPartType.Chest,
             // BodyPartType.Groin, // Chaos-Station-Tweak
         };

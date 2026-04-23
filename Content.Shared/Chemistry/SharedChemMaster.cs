@@ -120,6 +120,7 @@ namespace Content.Shared.Chemistry
     public enum ChemMasterTarget
     {
         Buffer,
+        Container,
         Medipen,
     }
     // CS-Tweak end

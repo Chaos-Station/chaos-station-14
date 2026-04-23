@@ -21,7 +21,7 @@
   - type: Physics
     bodyType: Static
   - type: Damageable
-    damageContainer: Inorganic
+    damageContainer: SiliconRadiation # CS-Tweak: Inorganic -> SiliconRadiation
     damageModifierSet: HardLightBarrier
   - type: AmbientSound
     volume: 35
