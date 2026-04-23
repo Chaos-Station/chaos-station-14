@@ -483,7 +483,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
             <= 0.20f => BloodlossStage.Stage4,
             <= 0.35f => BloodlossStage.Stage3,
             <= 0.50f => BloodlossStage.Stage2,
-            <= 0.80f => BloodlossStage.Stage1,
+            <= 0.70f => BloodlossStage.Stage1,
             _ => BloodlossStage.None,
         };
     }
@@ -505,7 +505,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     {
         return stage switch
         {
-            BloodlossStage.Stage1 => 0.85f,
+            BloodlossStage.Stage1 => 0.90f,
             BloodlossStage.Stage2 => 0.65f,
             BloodlossStage.Stage3 => 0.50f,
             BloodlossStage.Stage4 => 0.50f,
