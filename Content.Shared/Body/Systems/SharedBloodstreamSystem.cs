@@ -34,6 +34,7 @@ using Robust.Shared.Timing;
 using System.Linq;
 using Content.Shared.Chemistry.Reaction;
 using Content.Shared.EntityEffects.Effects;
+using Content.Shared.Bed.Sleep;
 
 namespace Content.Shared.Body.Systems;
 
@@ -451,6 +452,12 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossFaintStatusEffect);
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossCriticalSleepStatusEffect);
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossHallucinationStatusEffect);
+
+        if (TryComp<SleepingComponent>(ent.Owner, out var sleeping))
+        {
+            var sleepingSys = EntitySystem.Get<SleepingSystem>();
+            sleepingSys.TryWaking((ent.Owner, sleeping), force: true);
+        }
     }
     // Chaos-Station-Start
     private void OnRefreshMovementSpeedModifiers(Entity<BloodstreamComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
