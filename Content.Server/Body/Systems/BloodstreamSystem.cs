@@ -140,6 +140,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using Content.Server.Hands.Systems;
+using Content.Shared.Bed.Sleep;
 
 namespace Content.Server.Body.Systems;
 
@@ -163,6 +164,8 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
     [Dependency] private readonly SharedStunSystem _stun = default!;
+    [Dependency] private readonly SleepingSystem _sleeping = default!;
+    [Dependency] private readonly IEntityManager _entManager = default!;
 
     public override void Initialize()
     {
@@ -238,6 +241,15 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
             bloodstream.LastProcessedBloodlossStage = stage;
         }
 
+        if (stage == BloodlossStage.Stage4)
+        {
+            bloodstream.MinimumBloodlossUnconsciousUntil = curTime + Stage4MinimumSleepDuration > bloodstream.MinimumBloodlossUnconsciousUntil
+                ? curTime + Stage4MinimumSleepDuration
+                : bloodstream.MinimumBloodlossUnconsciousUntil;
+        }
+
+        EnsureCriticalBloodlossSleep(uid, bloodstream, curTime);
+
         switch (stage)
         {
             case BloodlossStage.Stage2:
@@ -250,6 +262,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                     TryDropRandomHeldItem(uid);
                 });
                 break;
+
             case BloodlossStage.Stage3:
                 TryProcessTimedEffect(ref bloodstream.NextBloodlossKnockdownAttempt, curTime, Stage3KnockdownInterval, 0.30f, () =>
                 {
@@ -264,15 +277,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                     _statusEffects.TrySetStatusEffectDuration(uid, BloodlossFaintStatusEffect, BloodlossFaintDuration);
                 });
                 break;
-            case BloodlossStage.Stage4:
-                bloodstream.MinimumBloodlossUnconsciousUntil = curTime + Stage4MinimumSleepDuration > bloodstream.MinimumBloodlossUnconsciousUntil
-                    ? curTime + Stage4MinimumSleepDuration
-                    : bloodstream.MinimumBloodlossUnconsciousUntil;
-                EnsureCriticalBloodlossSleep(uid, bloodstream, curTime, forceRefresh: true);
-                break;
-            default:
-                EnsureCriticalBloodlossSleep(uid, bloodstream, curTime);
-                break;
+
         }
     }
 
@@ -288,11 +293,13 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                 bloodstream.NextBloodlossKnockdownAttempt = curTime + Stage2KnockdownInterval;
                 bloodstream.NextBloodlossItemDropAttempt = curTime + Stage2DropInterval;
                 break;
+
             case BloodlossStage.Stage3:
                 bloodstream.NextBloodlossKnockdownAttempt = curTime + Stage3KnockdownInterval;
                 bloodstream.NextBloodlossItemDropAttempt = curTime + Stage3DropInterval;
                 bloodstream.NextBloodlossFaintAttempt = curTime + Stage3FaintInterval;
                 break;
+
             case BloodlossStage.Stage4:
                 bloodstream.MinimumBloodlossUnconsciousUntil = curTime + Stage4MinimumSleepDuration > bloodstream.MinimumBloodlossUnconsciousUntil
                     ? curTime + Stage4MinimumSleepDuration
@@ -301,35 +308,58 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
         }
     }
 
-    private void EnsureCriticalBloodlossSleep(EntityUid uid, BloodstreamComponent bloodstream, TimeSpan curTime, bool forceRefresh = false)
+    private void EnsureCriticalBloodlossSleep(EntityUid uid, BloodstreamComponent bloodstream, TimeSpan curTime)
     {
-        if (bloodstream.CurrentBloodlossStage == BloodlossStage.Stage4)
+        var shouldSleep = bloodstream.CurrentBloodlossStage == BloodlossStage.Stage4
+            || bloodstream.MinimumBloodlossUnconsciousUntil > curTime;
+
+        if (shouldSleep)
         {
             var duration = bloodstream.MinimumBloodlossUnconsciousUntil > curTime
                 ? bloodstream.MinimumBloodlossUnconsciousUntil - curTime
                 : Stage4SleepRefreshDuration;
 
-            if (duration < Stage4SleepRefreshDuration)
-                duration = Stage4SleepRefreshDuration;
+            _statusEffects.TryUpdateStatusEffectDuration(uid, BloodlossCriticalSleepStatusEffect, duration);
 
-            _statusEffects.TrySetStatusEffectDuration(uid, BloodlossCriticalSleepStatusEffect, duration);
+            if (!_entManager.HasComponent<SleepingComponent>(uid))
+                _sleeping.TrySleeping(uid);
+
             return;
         }
 
-        if (bloodstream.MinimumBloodlossUnconsciousUntil > curTime)
+        if (bloodstream.MinimumBloodlossUnconsciousUntil == TimeSpan.Zero
+            && !_entManager.HasComponent<SleepingComponent>(uid)
+            && !_statusEffects.HasStatusEffect(uid, BloodlossCriticalSleepStatusEffect))
         {
-            _statusEffects.TrySetStatusEffectDuration(
-                uid,
-                BloodlossCriticalSleepStatusEffect,
-                bloodstream.MinimumBloodlossUnconsciousUntil - curTime);
             return;
         }
 
         bloodstream.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
-        if (forceRefresh)
-            return;
-
         _statusEffects.TryRemoveStatusEffect(uid, BloodlossCriticalSleepStatusEffect);
+
+        if (_entManager.HasComponent<SleepingComponent>(uid))
+            _sleeping.TryWaking(uid, true);
+
+        return;
+
+        if (bloodstream.CurrentBloodlossStage == BloodlossStage.Stage4)
+        {
+            if (!_entManager.HasComponent<SleepingComponent>(uid))
+                _sleeping.TrySleeping(uid);
+            return;
+        }
+
+        // Стадия ниже 4, но есть остаток времени принудительного сна
+        if (bloodstream.MinimumBloodlossUnconsciousUntil > curTime)
+        {
+            if (!_entManager.HasComponent<SleepingComponent>(uid))
+                _sleeping.TrySleeping(uid);
+            return;
+        }
+
+        // Время вышло — будим
+        bloodstream.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
+        _sleeping.TryWaking(uid, true);
     }
 
     private void TryProcessTimedEffect(ref TimeSpan nextAttempt, TimeSpan curTime, TimeSpan interval, float chance, Action effect)

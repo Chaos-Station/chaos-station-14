@@ -57,6 +57,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     [Dependency] private readonly SharedDrunkSystem _drunkSystem = default!;
     [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
     [Dependency] private readonly MovementSpeedModifierSystem _movementSpeedModifier = default!;
+    [Dependency] private readonly SleepingSystem _sleeping = default!;
 
 
     private float _bloodlossMultiplier = 4f; // Goobstation
@@ -437,26 +438,27 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         if (SolutionContainer.ResolveSolution(ent.Owner, ent.Comp.ChemicalSolutionName, ref ent.Comp.ChemicalSolution))
             SolutionContainer.RemoveAllSolution(ent.Comp.ChemicalSolution.Value);
 
-        // Chaos-Station-Tweak: debug/rejuvenate healing should not leave bloodloss forced-sleep timers behind.
         ent.Comp.NextBloodlossKnockdownAttempt = TimeSpan.Zero;
         ent.Comp.NextBloodlossItemDropAttempt = TimeSpan.Zero;
         ent.Comp.NextBloodlossFaintAttempt = TimeSpan.Zero;
         ent.Comp.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
         ent.Comp.LastProcessedBloodlossStage = BloodlossStage.None;
+        
         if (ent.Comp.StatusTime > TimeSpan.Zero)
             _drunkSystem.TryRemoveDrunkenessTime(ent.Owner, ent.Comp.StatusTime.TotalSeconds);
 
         ent.Comp.StatusTime = TimeSpan.Zero;
         DirtyField(ent, ent.Comp, nameof(BloodstreamComponent.StatusTime));
+        
         UpdateBloodlossStage(ent, BloodlossStage.None);
+        
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossFaintStatusEffect);
-        _statusEffects.TryRemoveStatusEffect(ent, BloodlossCriticalSleepStatusEffect);
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossHallucinationStatusEffect);
 
+        // Принудительно будим без лишних проверок
         if (TryComp<SleepingComponent>(ent.Owner, out var sleeping))
         {
-            var sleepingSys = EntitySystem.Get<SleepingSystem>();
-            sleepingSys.TryWaking((ent.Owner, sleeping), force: true);
+            _sleeping.TryWaking((ent.Owner, sleeping), force: true);
         }
     }
     // Chaos-Station-Start

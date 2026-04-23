@@ -3,7 +3,7 @@
   id: StatusEffectBloodlossFaint
   name: bloodloss faint
   components:
-  - type: ForcedSleepingStatusEffect
+  # - type: ForcedSleepingStatusEffect
   - type: StunnedStatusEffect
   - type: KnockdownStatusEffect
 
@@ -12,8 +12,8 @@
   id: StatusEffectBloodlossCriticalSleep
   name: critical bloodloss
   components:
-  - type: Sleeping
-  - type: ForcedSleepingStatusEffect
+  # - type: Sleeping
+  # - type: ForcedSleepingStatusEffect
   - type: StunnedStatusEffect
   - type: KnockdownStatusEffect
 
