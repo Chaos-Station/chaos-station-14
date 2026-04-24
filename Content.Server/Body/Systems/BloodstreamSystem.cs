@@ -141,6 +141,7 @@ using Robust.Shared.Random;
 using Robust.Shared.Timing;
 using Content.Server.Hands.Systems;
 using Content.Shared.Bed.Sleep;
+using Content.Shared.Eye.Blinding.Components;
 
 namespace Content.Server.Body.Systems;
 
@@ -157,13 +158,14 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
     private static readonly TimeSpan Stage4SleepRefreshDuration = TimeSpan.FromSeconds(5);
     private static readonly EntProtoId BloodlossFaintStatusEffect = "StatusEffectBloodlossFaint";
     private static readonly EntProtoId BloodlossCriticalSleepStatusEffect = "StatusEffectBloodlossCriticalSleep";
-    private static readonly EntProtoId BloodlossBlindnessStatusEffect = "StatusEffectBloodlossBlindness";
+    private const string BloodlossBlindnessStatusEffect = "BloodlossBlindness";
 
     [Dependency] private readonly HandsSystem _hands = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
+    [Dependency] private readonly Content.Shared.StatusEffect.StatusEffectsSystem _oldStatusEffects = default!;
     [Dependency] private readonly SharedStunSystem _stun = default!;
     [Dependency] private readonly SleepingSystem _sleeping = default!;
     [Dependency] private readonly IEntityManager _entManager = default!;
@@ -276,7 +278,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                 TryProcessTimedEffect(ref bloodstream.NextBloodlossFaintAttempt, curTime, Stage3FaintInterval, 0.15f, () =>
                 {
                     _statusEffects.TrySetStatusEffectDuration(uid, BloodlossFaintStatusEffect, BloodlossFaintDuration);
-                    _statusEffects.TrySetStatusEffectDuration(uid, BloodlossBlindnessStatusEffect, BloodlossFaintDuration);
+                    _oldStatusEffects.TryAddStatusEffect<TemporaryBlindnessComponent>(uid, BloodlossBlindnessStatusEffect, BloodlossFaintDuration, true);
                 });
                 break;
 
@@ -322,7 +324,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                 : Stage4SleepRefreshDuration;
 
             _statusEffects.TryUpdateStatusEffectDuration(uid, BloodlossCriticalSleepStatusEffect, duration);
-            _statusEffects.TryUpdateStatusEffectDuration(uid, BloodlossBlindnessStatusEffect, duration);
+            _oldStatusEffects.TryAddStatusEffect<TemporaryBlindnessComponent>(uid, BloodlossBlindnessStatusEffect, duration, true);
 
             if (!_entManager.HasComponent<SleepingComponent>(uid))
                 _sleeping.TrySleeping(uid);
@@ -333,14 +335,14 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
         if (bloodstream.MinimumBloodlossUnconsciousUntil == TimeSpan.Zero
             && !_entManager.HasComponent<SleepingComponent>(uid)
             && !_statusEffects.HasStatusEffect(uid, BloodlossCriticalSleepStatusEffect)
-            && !_statusEffects.HasStatusEffect(uid, BloodlossBlindnessStatusEffect))
+            && !_oldStatusEffects.HasStatusEffect(uid, BloodlossBlindnessStatusEffect))
         {
             return;
         }
 
         bloodstream.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
         _statusEffects.TryRemoveStatusEffect(uid, BloodlossCriticalSleepStatusEffect);
-        _statusEffects.TryRemoveStatusEffect(uid, BloodlossBlindnessStatusEffect);
+        _oldStatusEffects.TryRemoveStatusEffect(uid, BloodlossBlindnessStatusEffect);
 
         if (_entManager.HasComponent<SleepingComponent>(uid))
             _sleeping.TryWaking(uid, true);

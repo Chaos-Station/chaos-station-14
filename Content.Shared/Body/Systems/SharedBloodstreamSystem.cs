@@ -43,7 +43,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     private static readonly EntProtoId BloodlossHallucinationStatusEffect = "StatusEffectSeeingRainbow";
     private static readonly EntProtoId BloodlossFaintStatusEffect = "StatusEffectBloodlossFaint";
     private static readonly EntProtoId BloodlossCriticalSleepStatusEffect = "StatusEffectBloodlossCriticalSleep";
-    private static readonly EntProtoId BloodlossBlindnessStatusEffect = "StatusEffectBloodlossBlindness";
+    private const string BloodlossBlindnessStatusEffect = "BloodlossBlindness";
 
     [Dependency] protected readonly SharedSolutionContainerSystem SolutionContainer = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -57,6 +57,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     [Dependency] private readonly DamageableSystem _damageableSystem = default!;
     [Dependency] private readonly SharedDrunkSystem _drunkSystem = default!;
     [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
+    [Dependency] private readonly Content.Shared.StatusEffect.StatusEffectsSystem _oldStatusEffects = default!;
     [Dependency] private readonly MovementSpeedModifierSystem _movementSpeedModifier = default!;
     [Dependency] private readonly SleepingSystem _sleeping = default!;
 
@@ -455,7 +456,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossFaintStatusEffect);
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossCriticalSleepStatusEffect);
-        _statusEffects.TryRemoveStatusEffect(ent, BloodlossBlindnessStatusEffect);
+        _oldStatusEffects.TryRemoveStatusEffect(ent, BloodlossBlindnessStatusEffect);
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossHallucinationStatusEffect);
 
         // Принудительно будим без лишних проверок
@@ -495,7 +496,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
             <= 0.20f => BloodlossStage.Stage4,
             <= 0.35f => BloodlossStage.Stage3,
             <= 0.50f => BloodlossStage.Stage2,
-            <= 0.70f => BloodlossStage.Stage1,
+            <= 0.75f => BloodlossStage.Stage1,
             _ => BloodlossStage.None,
         };
     }
@@ -517,7 +518,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     {
         return stage switch
         {
-            BloodlossStage.Stage1 => 0.90f,
+            BloodlossStage.Stage1 => 0.85f,
             BloodlossStage.Stage2 => 0.65f,
             BloodlossStage.Stage3 => 0.50f,
             BloodlossStage.Stage4 => 0.50f,
