@@ -43,6 +43,7 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
     private static readonly EntProtoId BloodlossHallucinationStatusEffect = "StatusEffectSeeingRainbow";
     private static readonly EntProtoId BloodlossFaintStatusEffect = "StatusEffectBloodlossFaint";
     private static readonly EntProtoId BloodlossCriticalSleepStatusEffect = "StatusEffectBloodlossCriticalSleep";
+    private static readonly EntProtoId BloodlossBlindnessStatusEffect = "StatusEffectBloodlossBlindness";
 
     [Dependency] protected readonly SharedSolutionContainerSystem SolutionContainer = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -453,6 +454,8 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         UpdateBloodlossStage(ent, BloodlossStage.None);
         
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossFaintStatusEffect);
+        _statusEffects.TryRemoveStatusEffect(ent, BloodlossCriticalSleepStatusEffect);
+        _statusEffects.TryRemoveStatusEffect(ent, BloodlossBlindnessStatusEffect);
         _statusEffects.TryRemoveStatusEffect(ent, BloodlossHallucinationStatusEffect);
 
         // Принудительно будим без лишних проверок

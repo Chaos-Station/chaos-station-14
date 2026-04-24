@@ -157,6 +157,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
     private static readonly TimeSpan Stage4SleepRefreshDuration = TimeSpan.FromSeconds(5);
     private static readonly EntProtoId BloodlossFaintStatusEffect = "StatusEffectBloodlossFaint";
     private static readonly EntProtoId BloodlossCriticalSleepStatusEffect = "StatusEffectBloodlossCriticalSleep";
+    private static readonly EntProtoId BloodlossBlindnessStatusEffect = "StatusEffectBloodlossBlindness";
 
     [Dependency] private readonly HandsSystem _hands = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -275,6 +276,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                 TryProcessTimedEffect(ref bloodstream.NextBloodlossFaintAttempt, curTime, Stage3FaintInterval, 0.15f, () =>
                 {
                     _statusEffects.TrySetStatusEffectDuration(uid, BloodlossFaintStatusEffect, BloodlossFaintDuration);
+                    _statusEffects.TrySetStatusEffectDuration(uid, BloodlossBlindnessStatusEffect, BloodlossFaintDuration);
                 });
                 break;
 
@@ -320,6 +322,7 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
                 : Stage4SleepRefreshDuration;
 
             _statusEffects.TryUpdateStatusEffectDuration(uid, BloodlossCriticalSleepStatusEffect, duration);
+            _statusEffects.TryUpdateStatusEffectDuration(uid, BloodlossBlindnessStatusEffect, duration);
 
             if (!_entManager.HasComponent<SleepingComponent>(uid))
                 _sleeping.TrySleeping(uid);
@@ -329,37 +332,23 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
 
         if (bloodstream.MinimumBloodlossUnconsciousUntil == TimeSpan.Zero
             && !_entManager.HasComponent<SleepingComponent>(uid)
-            && !_statusEffects.HasStatusEffect(uid, BloodlossCriticalSleepStatusEffect))
+            && !_statusEffects.HasStatusEffect(uid, BloodlossCriticalSleepStatusEffect)
+            && !_statusEffects.HasStatusEffect(uid, BloodlossBlindnessStatusEffect))
         {
             return;
         }
 
         bloodstream.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
         _statusEffects.TryRemoveStatusEffect(uid, BloodlossCriticalSleepStatusEffect);
+        _statusEffects.TryRemoveStatusEffect(uid, BloodlossBlindnessStatusEffect);
 
         if (_entManager.HasComponent<SleepingComponent>(uid))
             _sleeping.TryWaking(uid, true);
 
-        return;
-
-        if (bloodstream.CurrentBloodlossStage == BloodlossStage.Stage4)
-        {
-            if (!_entManager.HasComponent<SleepingComponent>(uid))
-                _sleeping.TrySleeping(uid);
-            return;
-        }
 
         // Стадия ниже 4, но есть остаток времени принудительного сна
-        if (bloodstream.MinimumBloodlossUnconsciousUntil > curTime)
-        {
-            if (!_entManager.HasComponent<SleepingComponent>(uid))
-                _sleeping.TrySleeping(uid);
-            return;
-        }
 
         // Время вышло — будим
-        bloodstream.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
-        _sleeping.TryWaking(uid, true);
     }
 
     private void TryProcessTimedEffect(ref TimeSpan nextAttempt, TimeSpan curTime, TimeSpan interval, float chance, Action effect)

@@ -19,6 +19,13 @@
 
 - type: entity
   parent: MobStatusEffectDebuff
+  id: StatusEffectBloodlossBlindness
+  name: bloodloss blindness
+  components:
+  - type: TemporaryBlindness
+
+- type: entity
+  parent: MobStatusEffectDebuff
   id: StatusEffectBloodstreamInfectionFaint
   name: bloodstream infection faint
   components:
