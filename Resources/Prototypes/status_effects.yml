@@ -64,6 +64,10 @@
   id: TemporaryBlindness
 
 - type: statusEffect
+  id: BloodlossBlindness
+  alwaysAllowed: true
+
+- type: statusEffect
   id: Pacified #cannot attack
 
 - type: statusEffect

@@ -1,0 +1,36 @@
+- type: entity
+  parent: MobStatusEffectDebuff
+  id: StatusEffectBloodlossFaint
+  name: bloodloss faint
+  components:
+  # - type: ForcedSleepingStatusEffect
+  - type: StunnedStatusEffect
+  - type: KnockdownStatusEffect
+
+- type: entity
+  parent: MobStatusEffectDebuff
+  id: StatusEffectBloodlossCriticalSleep
+  name: critical bloodloss
+  components:
+  # - type: Sleeping
+  # - type: ForcedSleepingStatusEffect
+  - type: StunnedStatusEffect
+  - type: KnockdownStatusEffect
+
+- type: entity
+  parent: MobStatusEffectDebuff
+  id: StatusEffectBloodstreamInfectionFaint
+  name: bloodstream infection faint
+  components:
+  - type: ForcedSleepingStatusEffect
+  - type: StunnedStatusEffect
+  - type: KnockdownStatusEffect
+
+- type: entity
+  parent: MobStatusEffectDebuff
+  id: StatusEffectBloodstreamInfectionComa
+  name: bloodstream infection coma
+  components:
+  - type: ForcedSleepingStatusEffect
+  - type: StunnedStatusEffect
+  - type: KnockdownStatusEffect

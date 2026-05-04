@@ -31,6 +31,12 @@
     - Snout
   - type: Bloodstream
     bloodReagent: Potassium
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
   - type: Inventory
     templateId: human 
 

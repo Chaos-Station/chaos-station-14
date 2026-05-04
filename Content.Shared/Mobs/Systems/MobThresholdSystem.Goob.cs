@@ -33,7 +33,7 @@ public sealed partial class MobThresholdSystem
         {
             BodyPartType.Head,
             BodyPartType.Chest,
-            BodyPartType.Groin
+            // BodyPartType.Groin, // Chaos-Station-Tweak
         };
 
         foreach (var (woundable, _) in _wound.GetAllWoundableChildren(rootPart))

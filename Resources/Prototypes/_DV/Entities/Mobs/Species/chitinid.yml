@@ -48,6 +48,17 @@
       amount: 5
   - type: Bloodstream
     bloodReagent: InsectBlood
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
+    # Chaos-Station-Start
+    bloodMaxVolume: 200
+    bloodRefreshAmount: 0.1
+    bleedReductionAmount: 0.2
+    # Chaos-Station-End
   - type: Vocal
     sounds:
       Male: UnisexChitinid

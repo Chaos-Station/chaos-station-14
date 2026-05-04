@@ -110,6 +110,7 @@ using Content.Server.Body.Components;
 using Content.Server.Medical.Components;
 using Content.Server.PowerCell;
 using Content.Server.Temperature.Components;
+using Content.Shared._Chaos;
 using Content.Shared._Shitmed.Medical.HealthAnalyzer;
 using Content.Shared._Shitmed.Medical.Surgery.Pain.Components;
 using Content.Shared._Shitmed.Medical.Surgery.Traumas;
@@ -396,6 +397,15 @@ public sealed class HealthAnalyzerSystem : EntitySystem
             vitalDamage = _threshold.CheckVitalDamage(target, damageableComponent);
         // Goobstation end
 
+        // Chaos-Station-Start
+        int? bloodstreamInfectionStage = null;
+        float? bloodstreamInfectionDuration = null;
+        if (TryComp<BloodstreamInfectionComponent>(target, out var bloodstreamInfection) && bloodstreamInfection.Infected)
+        {
+            bloodstreamInfectionStage = (int) bloodstreamInfection.CurrentStage;
+            bloodstreamInfectionDuration = (float) (_timing.CurTime - bloodstreamInfection.InfectionStartTime).TotalSeconds;
+        }
+        // Chaos-Station-End
         switch (mode)
         {
             case HealthAnalyzerMode.Body:
@@ -408,6 +418,8 @@ public sealed class HealthAnalyzerSystem : EntitySystem
                     GetNetEntity(target),
                     bodyTemperature,
                     bloodAmount,
+                    bloodstreamInfectionStage, // Chaos-Station-Tweak
+                    bloodstreamInfectionDuration, // Chaos-Station-Tweak
                     scanMode,
                     unrevivable,
                     bodyStatus,
@@ -426,6 +438,8 @@ public sealed class HealthAnalyzerSystem : EntitySystem
                     GetNetEntity(target),
                     bodyTemperature,
                     bloodAmount,
+                    bloodstreamInfectionStage, // Chaos-Station-Tweak
+                    bloodstreamInfectionDuration, // Chaos-Station-Tweak
                     scanMode,
                     bleeding,
                     vitalDamage, // Goobstation
@@ -441,6 +455,8 @@ public sealed class HealthAnalyzerSystem : EntitySystem
                     GetNetEntity(target),
                     bodyTemperature,
                     bloodAmount,
+                    bloodstreamInfectionStage, // Chaos-Station-Tweak
+                    bloodstreamInfectionDuration, // Chaos-Station-Tweak
                     scanMode,
                     bleeding,
                     vitalDamage, // Goobstation

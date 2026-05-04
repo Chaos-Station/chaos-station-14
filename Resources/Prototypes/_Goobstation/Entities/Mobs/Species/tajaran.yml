@@ -175,6 +175,18 @@
     - DoorBumpOpener
     - FelinidEmotes # Since we need to add this, we also need to rewrite all others
     - AnomalyHost
+  # Chaos-Station-Start
+  - type: Bloodstream
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
+    bloodMaxVolume: 200
+    bloodRefreshAmount: 0.1
+    bleedReductionAmount: 0.2
+  # Chaos-Station-End
 
 - type: entity
   save: false

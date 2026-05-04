@@ -63,3 +63,15 @@ ascension_requires_objectives = false
 random_characters = false
 random_species_weights = ""
 ssd_sleep_time = 3600
+
+[heightadjust]
+modifies_bloodstream = false
+
+# Для локального PostgreSQL
+#[database]
+#engine = "postgres"
+#pg_database = "db"
+#pg_host = "127.0.0.1"
+#pg_port = 5432
+#pg_username = "user"
+#pg_password = "user"

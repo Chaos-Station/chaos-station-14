@@ -12,6 +12,17 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
 
 namespace Content.Shared.Body.Components;
 
+// Chaos-Station-Start
+public enum BloodlossStage : byte
+{
+    None,
+    Stage1,
+    Stage2,
+    Stage3,
+    Stage4,
+}
+// Chaos-Station-End
+
 /// <summary>
 /// Gives an entity a bloodstream.
 /// </summary>
@@ -78,7 +89,7 @@ public sealed partial class BloodstreamComponent : Component
     /// What percentage of current blood is necessary to avoid dealing blood loss damage?
     /// </summary>
     [DataField, AutoNetworkedField]
-    public float BloodlossThreshold = 0.9f;
+    public float BloodlossThreshold = 0.8f; // Chaos-Station-Tweak
 
     /// <summary>
     /// The base bloodloss damage to be incurred if below <see cref="BloodlossThreshold"/>
@@ -203,6 +214,14 @@ public sealed partial class BloodstreamComponent : Component
     /// </summary>
     [DataField, AutoNetworkedField]
     public TimeSpan StatusTime;
+
+    // Chaos-Station-Start
+    /// <summary>
+    /// Current bloodloss stage, calculated from the percentage of blood remaining.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public BloodlossStage CurrentBloodlossStage;
+    // Chaos-Station-End
 
     /// <summary>
     /// Alert to show when bleeding.

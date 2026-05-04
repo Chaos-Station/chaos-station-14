@@ -266,8 +266,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: _Shitmed/Mobs/Effects/bleeding_damage.rsi
   - type: Woundable
-    integrity: 80
-    integrityCap: 80
+    integrity: 75 # Chaos-Station-Tweak
+    integrityCap: 75 # Chaos-Station-Tweak
     thresholds:
       Minor: 70
       Moderate: 50
@@ -303,8 +303,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: _Shitmed/Mobs/Effects/bleeding_damage.rsi
   - type: Woundable
-    integrity: 80
-    integrityCap: 80
+    integrity: 75 # Chaos-Station-Tweak
+    integrityCap: 75 # Chaos-Station-Tweak
     thresholds:
       Minor: 70
       Moderate: 50
@@ -336,8 +336,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: null
   - type: Woundable
-    integrity: 50
-    integrityCap: 50
+    integrity: 60 # Chaos-Station-Tweak
+    integrityCap: 60 # Chaos-Station-Tweak
     thresholds:
       Minor: 42
       Moderate: 36
@@ -359,8 +359,8 @@
     symmetry: Right
     toolName: "a right hand" # Shitmed Change
   - type: Woundable
-    integrity: 60
-    integrityCap: 60
+    integrity: 60 # Chaos-Station-Tweak
+    integrityCap: 60 # Chaos-Station-Tweak
     thresholds:
       Minor: 50
       Moderate: 40
@@ -407,8 +407,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: _Shitmed/Mobs/Effects/bleeding_damage.rsi
   - type: Woundable
-    integrity: 80
-    integrityCap: 80
+    integrity: 75 # Chaos-Station-Tweak
+    integrityCap: 75 # Chaos-Station-Tweak
     thresholds:
       Minor: 70
       Moderate: 50
@@ -445,8 +445,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: _Shitmed/Mobs/Effects/bleeding_damage.rsi
   - type: Woundable
-    integrity: 80
-    integrityCap: 80
+    integrity: 75 # Chaos-Station-Tweak
+    integrityCap: 75 # Chaos-Station-Tweak
     thresholds:
       Minor: 70
       Moderate: 50
@@ -478,8 +478,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: null
   - type: Woundable
-    integrity: 60
-    integrityCap: 60
+    integrity: 60 # Chaos-Station-Tweak
+    integrityCap: 60 # Chaos-Station-Tweak
     thresholds:
       Minor: 50
       Moderate: 40
@@ -511,8 +511,8 @@
         sprite: _Shitmed/Mobs/Effects/burn_damage.rsi
     bleedingOverlay: null
   - type: Woundable
-    integrity: 60
-    integrityCap: 60
+    integrity: 60 # Chaos-Station-Tweak
+    integrityCap: 60 # Chaos-Station-Tweak
     thresholds:
       Minor: 50
       Moderate: 40

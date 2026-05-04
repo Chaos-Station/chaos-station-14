@@ -335,7 +335,8 @@
   - type: Bloodstream
     bloodlossDamage:
       types:
-        Bloodloss: 0.5
+        Bloodloss: 0.25
     bloodlossHealDamage:
       types:
         Bloodloss: -1
+    bloodRefreshAmount: 0.1

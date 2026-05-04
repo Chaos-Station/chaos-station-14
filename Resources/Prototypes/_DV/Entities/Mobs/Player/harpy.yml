@@ -41,3 +41,15 @@
     - NanoTrasen
   - type: Sprinter # Goob change: funny feet make you unable to run for long, fly instead.
     staminaDrainRate: 13
+  # Chaos-Station-Start
+  - type: Bloodstream
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
+    bloodMaxVolume: 200
+    bloodRefreshAmount: 0.1
+    bleedReductionAmount: 0.2
+    # Chaos-Station-End

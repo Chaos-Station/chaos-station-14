@@ -368,6 +368,7 @@ namespace Content.Client.HealthAnalyzer.UI
                 });
             }*/
 
+            AddBloodstreamInfectionCondition(msg); // Chaos-Station-Tweak
             if (ConditionsListContainer.ChildCount == 0)
             {
                 ConditionsListContainer.AddChild(new RichTextLabel
@@ -420,6 +421,8 @@ namespace Content.Client.HealthAnalyzer.UI
                 });
             }
 
+            AddBloodstreamInfectionCondition(msg); // Chaos-Station-Tweak
+
             if (ConditionsListContainer.ChildCount == 0)
             {
                 ConditionsListContainer.AddChild(new RichTextLabel
@@ -447,11 +450,17 @@ namespace Content.Client.HealthAnalyzer.UI
 
             DrawSolutionDiagnostics(msg.Solutions);
 
-            ConditionsListContainer.AddChild(new RichTextLabel
+            AddBloodstreamInfectionCondition(msg); // Chaos-Station-Tweak
+            // Chaos-Station-Start
+            if (ConditionsListContainer.ChildCount == 0)
             {
-                Text = Loc.GetString("condition-none"),
-                Margin = new Thickness(0, 4),
-            });
+                ConditionsListContainer.AddChild(new RichTextLabel
+                {
+                    Text = Loc.GetString("condition-none"),
+                    Margin = new Thickness(0, 4),
+                });
+            }
+            // Chaos-Station-End
         }
 
         private bool TryGetEntityName(NetEntity ent, out string name)
@@ -476,6 +485,32 @@ namespace Content.Client.HealthAnalyzer.UI
             name = Identity.Name(ent, _entityManager);
             return true;
         }
+        // Chaos-Station-Start
+        private void AddBloodstreamInfectionCondition(HealthAnalyzerBaseMessage msg)
+        {
+            if (msg.BloodstreamInfectionStage is not { } stage || stage <= 0)
+                return;
+
+            var stageName = Loc.GetString(GetBloodstreamInfectionStageLocKey(stage));
+            ConditionsListContainer.AddChild(new RichTextLabel
+            {
+                Text = Loc.GetString(
+                    "condition-body-bloodstream-infection",
+                    ("stage", stageName)),
+                Margin = new Thickness(0, 4),
+            });
+        }
+
+        private static string GetBloodstreamInfectionStageLocKey(int stage)
+        {
+            return stage switch
+            {
+                1 => "condition-body-bloodstream-infection-stage-infection",
+                2 or 3 => "condition-body-bloodstream-infection-stage-sepsis",
+                _ => "condition-body-bloodstream-infection-stage-putrid-blood",
+            };
+        }
+        // Chaos-Station-End
         // Shitmed Change End
         private static string GetStatus(MobState mobState)
         {

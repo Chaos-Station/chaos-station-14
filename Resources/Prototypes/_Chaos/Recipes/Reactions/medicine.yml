@@ -1,0 +1,26 @@
+- type: reaction
+  id: Ceffenaf
+  minTemp: 370
+  reactants:
+    Tricordrazine:
+      amount: 10
+    Devirate:
+      amount: 5
+    Dylovene:
+      amount: 10
+    Plasma:
+      amount: 5
+  products:
+    Ceffenaf: 10
+
+- type: reaction
+  id: Terbinar
+  reactants:
+    Dylovene:
+      amount: 5
+    Ethanol:
+      amount: 5
+    Silicon:
+      amount: 5
+  products:
+    Terbinar: 15

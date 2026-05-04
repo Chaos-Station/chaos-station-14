@@ -132,11 +132,44 @@ using Content.Shared.Chemistry.Reaction;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Forensics;
 using Content.Shared.Forensics.Components;
+using Content.Shared.Hands.Components;
+using Content.Shared.Mobs.Systems;
+using Content.Shared.StatusEffectNew;
+using Content.Shared.Stunnable;
+using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
+using Robust.Shared.Timing;
+using Content.Server.Hands.Systems;
+using Content.Shared.Bed.Sleep;
+using Content.Shared.Eye.Blinding.Components;
 
 namespace Content.Server.Body.Systems;
 
 public sealed class BloodstreamSystem : SharedBloodstreamSystem
 {
+    private static readonly TimeSpan BloodlossKnockdownDuration = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan BloodlossFaintDuration = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan Stage2KnockdownInterval = TimeSpan.FromSeconds(40);
+    private static readonly TimeSpan Stage2DropInterval = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan Stage3KnockdownInterval = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan Stage3DropInterval = TimeSpan.FromSeconds(40);
+    private static readonly TimeSpan Stage3FaintInterval = TimeSpan.FromSeconds(50);
+    private static readonly TimeSpan Stage4MinimumSleepDuration = TimeSpan.FromSeconds(120);
+    private static readonly TimeSpan Stage4SleepRefreshDuration = TimeSpan.FromSeconds(5);
+    private static readonly EntProtoId BloodlossFaintStatusEffect = "StatusEffectBloodlossFaint";
+    private static readonly EntProtoId BloodlossCriticalSleepStatusEffect = "StatusEffectBloodlossCriticalSleep";
+    private const string BloodlossBlindnessStatusEffect = "BloodlossBlindness";
+
+    [Dependency] private readonly HandsSystem _hands = default!;
+    [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly MobStateSystem _mobState = default!;
+    [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
+    [Dependency] private readonly Content.Shared.StatusEffect.StatusEffectsSystem _oldStatusEffects = default!;
+    [Dependency] private readonly SharedStunSystem _stun = default!;
+    [Dependency] private readonly SleepingSystem _sleeping = default!;
+    [Dependency] private readonly IEntityManager _entManager = default!;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -185,6 +218,176 @@ public sealed class BloodstreamSystem : SharedBloodstreamSystem
         else
             Log.Error("Unable to set bloodstream DNA, solution entity could not be resolved");
     }
+
+    // Chaos-Station-Start
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        var curTime = _timing.CurTime;
+        var query = EntityQueryEnumerator<BloodstreamComponent>();
+        while (query.MoveNext(out var uid, out var bloodstream))
+        {
+            if (_mobState.IsDead(uid))
+                continue;
+
+            ProcessBloodlossEffects(uid, bloodstream, curTime);
+        }
+    }
+
+    private void ProcessBloodlossEffects(EntityUid uid, BloodstreamComponent bloodstream, TimeSpan curTime)
+    {
+        var stage = bloodstream.CurrentBloodlossStage;
+        if (stage != bloodstream.LastProcessedBloodlossStage)
+        {
+            OnBloodlossStageChanged(bloodstream, stage, curTime);
+            bloodstream.LastProcessedBloodlossStage = stage;
+        }
+
+        if (stage == BloodlossStage.Stage4)
+        {
+            bloodstream.MinimumBloodlossUnconsciousUntil = curTime + Stage4MinimumSleepDuration > bloodstream.MinimumBloodlossUnconsciousUntil
+                ? curTime + Stage4MinimumSleepDuration
+                : bloodstream.MinimumBloodlossUnconsciousUntil;
+        }
+
+        EnsureCriticalBloodlossSleep(uid, bloodstream, curTime);
+
+        switch (stage)
+        {
+            case BloodlossStage.Stage2:
+                TryProcessTimedEffect(ref bloodstream.NextBloodlossKnockdownAttempt, curTime, Stage2KnockdownInterval, 0.15f, () =>
+                {
+                    _stun.TryKnockdown(uid, BloodlossKnockdownDuration, true);
+                });
+                TryProcessTimedEffect(ref bloodstream.NextBloodlossItemDropAttempt, curTime, Stage2DropInterval, 0.15f, () =>
+                {
+                    TryDropRandomHeldItem(uid);
+                });
+                break;
+
+            case BloodlossStage.Stage3:
+                TryProcessTimedEffect(ref bloodstream.NextBloodlossKnockdownAttempt, curTime, Stage3KnockdownInterval, 0.30f, () =>
+                {
+                    _stun.TryKnockdown(uid, BloodlossKnockdownDuration, true);
+                });
+                TryProcessTimedEffect(ref bloodstream.NextBloodlossItemDropAttempt, curTime, Stage3DropInterval, 0.30f, () =>
+                {
+                    TryDropRandomHeldItem(uid);
+                });
+                TryProcessTimedEffect(ref bloodstream.NextBloodlossFaintAttempt, curTime, Stage3FaintInterval, 0.15f, () =>
+                {
+                    _statusEffects.TrySetStatusEffectDuration(uid, BloodlossFaintStatusEffect, BloodlossFaintDuration);
+                    _oldStatusEffects.TryAddStatusEffect<TemporaryBlindnessComponent>(uid, BloodlossBlindnessStatusEffect, BloodlossFaintDuration, true);
+                });
+                break;
+
+        }
+    }
+
+    private void OnBloodlossStageChanged(BloodstreamComponent bloodstream, BloodlossStage stage, TimeSpan curTime)
+    {
+        bloodstream.NextBloodlossKnockdownAttempt = TimeSpan.Zero;
+        bloodstream.NextBloodlossItemDropAttempt = TimeSpan.Zero;
+        bloodstream.NextBloodlossFaintAttempt = TimeSpan.Zero;
+
+        switch (stage)
+        {
+            case BloodlossStage.Stage2:
+                bloodstream.NextBloodlossKnockdownAttempt = curTime + Stage2KnockdownInterval;
+                bloodstream.NextBloodlossItemDropAttempt = curTime + Stage2DropInterval;
+                break;
+
+            case BloodlossStage.Stage3:
+                bloodstream.NextBloodlossKnockdownAttempt = curTime + Stage3KnockdownInterval;
+                bloodstream.NextBloodlossItemDropAttempt = curTime + Stage3DropInterval;
+                bloodstream.NextBloodlossFaintAttempt = curTime + Stage3FaintInterval;
+                break;
+
+            case BloodlossStage.Stage4:
+                bloodstream.MinimumBloodlossUnconsciousUntil = curTime + Stage4MinimumSleepDuration > bloodstream.MinimumBloodlossUnconsciousUntil
+                    ? curTime + Stage4MinimumSleepDuration
+                    : bloodstream.MinimumBloodlossUnconsciousUntil;
+                break;
+        }
+    }
+
+    private void EnsureCriticalBloodlossSleep(EntityUid uid, BloodstreamComponent bloodstream, TimeSpan curTime)
+    {
+        var shouldSleep = bloodstream.CurrentBloodlossStage == BloodlossStage.Stage4
+            || bloodstream.MinimumBloodlossUnconsciousUntil > curTime;
+
+        if (shouldSleep)
+        {
+            var duration = bloodstream.MinimumBloodlossUnconsciousUntil > curTime
+                ? bloodstream.MinimumBloodlossUnconsciousUntil - curTime
+                : Stage4SleepRefreshDuration;
+
+            _statusEffects.TryUpdateStatusEffectDuration(uid, BloodlossCriticalSleepStatusEffect, duration);
+            _oldStatusEffects.TryAddStatusEffect<TemporaryBlindnessComponent>(uid, BloodlossBlindnessStatusEffect, duration, true);
+
+            if (!_entManager.HasComponent<SleepingComponent>(uid))
+                _sleeping.TrySleeping(uid);
+
+            return;
+        }
+
+        if (bloodstream.MinimumBloodlossUnconsciousUntil == TimeSpan.Zero
+            && !_entManager.HasComponent<SleepingComponent>(uid)
+            && !_statusEffects.HasStatusEffect(uid, BloodlossCriticalSleepStatusEffect)
+            && !_oldStatusEffects.HasStatusEffect(uid, BloodlossBlindnessStatusEffect))
+        {
+            return;
+        }
+
+        bloodstream.MinimumBloodlossUnconsciousUntil = TimeSpan.Zero;
+        _statusEffects.TryRemoveStatusEffect(uid, BloodlossCriticalSleepStatusEffect);
+        _oldStatusEffects.TryRemoveStatusEffect(uid, BloodlossBlindnessStatusEffect);
+
+        if (_entManager.HasComponent<SleepingComponent>(uid))
+            _sleeping.TryWaking(uid, true);
+
+
+        // Стадия ниже 4, но есть остаток времени принудительного сна
+
+        // Время вышло — будим
+    }
+
+    private void TryProcessTimedEffect(ref TimeSpan nextAttempt, TimeSpan curTime, TimeSpan interval, float chance, Action effect)
+    {
+        if (nextAttempt == TimeSpan.Zero)
+        {
+            nextAttempt = curTime + interval;
+            return;
+        }
+
+        if (curTime < nextAttempt)
+            return;
+
+        nextAttempt = curTime + interval;
+        if (_random.Prob(chance))
+            effect();
+    }
+
+    private void TryDropRandomHeldItem(EntityUid uid, HandsComponent? hands = null)
+    {
+        if (!Resolve(uid, ref hands, false))
+            return;
+
+        var heldHands = new List<string>();
+        foreach (var hand in hands.Hands.Keys)
+        {
+            if (_hands.TryGetHeldItem((uid, hands), hand, out _) && _hands.CanDropHeld(uid, hand, checkActionBlocker: false))
+                heldHands.Add(hand);
+        }
+
+        if (heldHands.Count == 0)
+            return;
+
+        var handToDrop = _random.Pick(heldHands);
+        _hands.TryDrop((uid, hands), handToDrop, checkActionBlocker: false);
+    }
+    // Chaos-Station-End
 
     /// <summary>
     /// Get the reagent data for blood that a specific entity should have.

@@ -1,0 +1,29 @@
+- type: entity
+  id: ChemistryBottleCeffenaf
+  suffix: ceffenaf
+  parent: BaseChemistryBottleFilled
+  components:
+  - type: Label
+    currentLabel: reagent-name-ceffenaf
+  - type: SolutionContainerManager
+    solutions:
+      drink:
+        maxVol: 30
+        reagents:
+        - ReagentId: Ceffenaf
+          Quantity: 30
+
+- type: entity
+  id: ChemistryBottleTerbinar
+  suffix: terbinar
+  parent: BaseChemistryBottleFilled
+  components:
+  - type: Label
+    currentLabel: reagent-name-terbinar
+  - type: SolutionContainerManager
+    solutions:
+      drink:
+        maxVol: 30
+        reagents:
+        - ReagentId: Terbinar
+          Quantity: 30

@@ -29,8 +29,9 @@ public sealed partial class TargetingComponent : Component
         {
             TargetBodyPart.Head, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.Head, 0.5f },
-                { TargetBodyPart.Chest, 0.5f },
+                { TargetBodyPart.Head, 1f }, // Chaos-Station-Tweak
+                // { TargetBodyPart.Head, 0.5f },
+                //{ TargetBodyPart.Chest, 0.5f },
             }
         },
         {
@@ -42,68 +43,77 @@ public sealed partial class TargetingComponent : Component
         {
             TargetBodyPart.Groin, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.Groin, 0.3f },
-                { TargetBodyPart.Chest, 0.7f },
+                { TargetBodyPart.Groin, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.Groin, 0.3f },
+                //{ TargetBodyPart.Chest, 0.7f },
             }
         },
         {
             TargetBodyPart.RightArm, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.RightArm, 0.7f },
-                { TargetBodyPart.Chest, 0.3f },
+                { TargetBodyPart.RightArm, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.RightArm, 0.7f },
+                //{ TargetBodyPart.Chest, 0.3f },
             }
         },
         {
             TargetBodyPart.LeftArm, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.LeftArm, 0.7f },
-                { TargetBodyPart.Chest, 0.3f },
+                { TargetBodyPart.LeftArm, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.LeftArm, 0.7f },
+                //{ TargetBodyPart.Chest, 0.3f },
             }
         },
         {
             TargetBodyPart.RightHand, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.RightHand, 0.1f },
-                { TargetBodyPart.Chest, 0.5f },
-                { TargetBodyPart.RightArm, 0.4f },
+                { TargetBodyPart.RightHand, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.RightHand, 0.1f },
+                //{ TargetBodyPart.Chest, 0.5f },
+                //{ TargetBodyPart.RightArm, 0.4f },
             }
         },
         {
             TargetBodyPart.LeftHand, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.LeftHand, 0.1f },
-                { TargetBodyPart.Chest, 0.5f },
-                { TargetBodyPart.LeftArm, 0.4f },
+                { TargetBodyPart.LeftHand, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.LeftHand, 0.1f },
+                //{ TargetBodyPart.Chest, 0.5f },
+                //{ TargetBodyPart.LeftArm, 0.4f },
             }
         },
         {
             TargetBodyPart.RightLeg, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.RightLeg, 0.7f },
-                { TargetBodyPart.Chest, 0.3f },
+                { TargetBodyPart.RightLeg, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.RightLeg, 0.7f },
+                //{ TargetBodyPart.Chest, 0.3f },
             }
         },
         {
             TargetBodyPart.LeftLeg, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.LeftLeg, 0.7f },
-                { TargetBodyPart.Chest, 0.3f },
+                { TargetBodyPart.LeftLeg, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.LeftLeg, 0.7f },
+                //{ TargetBodyPart.Chest, 0.3f },
             }
         },
         {
             TargetBodyPart.RightFoot, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.RightFoot, 0.1f },
-                { TargetBodyPart.Chest, 0.5f },
-                { TargetBodyPart.RightLeg, 0.4f },
+                { TargetBodyPart.RightFoot, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.RightFoot, 0.1f },
+                //{ TargetBodyPart.Chest, 0.5f },
+                //{ TargetBodyPart.RightLeg, 0.4f },
             }
         },
         {
             TargetBodyPart.LeftFoot, new Dictionary<TargetBodyPart, float>
             {
-                { TargetBodyPart.LeftFoot, 0.1f },
-                { TargetBodyPart.Chest, 0.5f },
-                { TargetBodyPart.LeftLeg, 0.4f },
+                { TargetBodyPart.LeftFoot, 1f }, // Chaos-Station-Tweak
+                //{ TargetBodyPart.LeftFoot, 0.1f },
+                //{ TargetBodyPart.Chest, 0.5f },
+                //{ TargetBodyPart.LeftLeg, 0.4f },
             }
         },
     };

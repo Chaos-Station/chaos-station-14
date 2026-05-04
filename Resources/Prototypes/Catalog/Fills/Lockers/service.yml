@@ -134,6 +134,8 @@
     children:
     - id: WetFloorSign
       amount: 3
+    - id: ChemistryBottleTerbinar # Chaos-Station-Tweak
+      amount: 2
     - id: LightReplacer
     - id: BoxLightMixed
     - id: Holoprojector

@@ -52,6 +52,12 @@
   - type: SurgeryTarget
   - type: Bloodstream
     bloodReagent: FluorosulfuricAcid
+    bloodlossDamage:
+      types:
+        Bloodloss: 0.25
+    bloodlossHealDamage:
+      types:
+        Bloodloss: -1
   - type: NightVision
     color: "#BF40BF"
     activateSound: null

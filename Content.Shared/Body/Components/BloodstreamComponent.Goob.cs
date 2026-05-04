@@ -1,3 +1,5 @@
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
+
 namespace Content.Shared.Body.Components;
 
 public sealed partial class BloodstreamComponent
@@ -17,4 +19,19 @@ public sealed partial class BloodstreamComponent
 
     [DataField, AutoNetworkedField]
     public float BleedAmountNotFromWounds;
+    // Chaos-Station-Start
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
+    public TimeSpan NextBloodlossKnockdownAttempt;
+
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
+    public TimeSpan NextBloodlossItemDropAttempt;
+
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
+    public TimeSpan NextBloodlossFaintAttempt;
+
+    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoPausedField]
+    public TimeSpan MinimumBloodlossUnconsciousUntil;
+
+    public BloodlossStage LastProcessedBloodlossStage;
+    // Chaos-Station-End
 }
